@@ -1,0 +1,14 @@
+{
+    "Owner": {
+        "ID": "b376bf325ae2891a950b8dab85fc06bcd4d41950c734834ef879244882aff0a7"
+    },
+    "Grants": [
+        {
+            "Grantee": {
+                "ID": "b376bf325ae2891a950b8dab85fc06bcd4d41950c734834ef879244882aff0a7",
+                "Type": "CanonicalUser"
+            },
+            "Permission": "FULL_CONTROL"
+        }
+    ]
+}

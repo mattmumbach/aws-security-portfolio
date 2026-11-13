@@ -1,0 +1,26 @@
+{
+    "SecurityGroups": [
+        {
+            "GroupId": "sg-06ca5b1936920267e",
+            "IpPermissionsEgress": [
+                {
+                    "IpProtocol": "-1",
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ],
+            "VpcId": "vpc-077397a527fc33ee4",
+            "SecurityGroupArn": "arn:aws:ec2:us-east-1:58********27:security-group/sg-06ca5b1936920267e",
+            "OwnerId": "58********27",
+            "GroupName": "lab-open-ssh-bbea",
+            "Description": "project1 deliberate finding",
+            "IpPermissions": []
+        }
+    ]
+}

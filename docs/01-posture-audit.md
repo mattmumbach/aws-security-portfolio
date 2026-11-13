@@ -1,160 +1,161 @@
 # 01 - Cloud security posture audit (AWS)
 
-**Time:** 4-6 hours | **Cost:** under 5 USD | **Level:** beginner-intermediate
+**Status:** complete, 2026-11-13 | **Account:** 58********27 | **Region:** us-east-1
+**Cost of the whole project:** under 5 USD
 
-## Objective
+## Summary
 
-Answer the question every cloud security team answers weekly: *what in this account would fail an
-audit or enable a breach today, and what did we fix?* You will deliberately deploy a weak baseline,
-measure it against CIS and AWS Foundational Security Best Practices (FSBP), remediate the
-high-severity items, and prove the score moved.
+I deployed four deliberately weak resources, measured the account with two independent tools, fixed
+what mattered, and proved each fix with a before/after pair rather than a claim.
+
+Five deliberate findings were closed, plus two account-level gaps that the lab did not plant but the
+audit found: no account-level S3 Block Public Access, and a password policy that had never been set
+at all. Separately, the same audit surfaced five S3 buckets, six IAM roles and four policies left
+behind by a 2024 course - documented in `00-account-inventory.md` and
+`evidence/01-posture/raw/decommission-2024-course.txt`.
+
+The most useful result is not the remediation. It is the disagreement between the two tools: Prowler
+reported 80 failing checks, Security Hub reported 8 failing findings out of 10 it could evaluate. A
+scanner's score is a claim about coverage, not a measurement of the account.
 
 ## Environment
 
-One account, `us-east-1`, with intentionally imperfect resources:
-
 | Resource | Deliberate weakness |
-|----------|---------------------|
-| S3 bucket `posture-lab-<random>` | Block Public Access partially off, no default encryption |
-| Security group `lab-open-ssh` | Ingress 22/tcp from 0.0.0.0/0 |
-| EC2 t3.micro | IMDSv1 allowed, no detailed monitoring |
-| IAM user `lab-legacy-user` | Active access key, no MFA, `s3:*` inline policy |
-| CloudTrail | Not yet enabled (turn it on in this lab and note it as finding #1) |
+|---|---|
+| S3 `posture-lab-e7c1774f` | 3 of 4 public access blocks off, public `GetObject` policy, no default encryption, no versioning |
+| SG `sg-06ca5b1936920267e` (`lab-open-ssh-bbea`) | 22/tcp from 0.0.0.0/0 |
+| EC2 `i-09bc37f318059ae62` (t3.micro, `posture-lab`) | IMDSv1 permitted, no instance profile |
+| IAM user `lab-legacy-user` | active access key, no MFA, inline `s3:*` on `*` |
 
-```bash
-BUCKET="posture-lab-$RANDOM"
-aws s3api create-bucket --bucket "$BUCKET" --profile portfolio
-aws s3api put-public-access-block --bucket "$BUCKET" --profile portfolio \
-  --public-access-block-configuration \
-  BlockPublicAcls=true,IgnorePublicAcls=false,BlockPublicPolicy=false,RestrictPublicBuckets=false
-aws s3api put-bucket-encryption --bucket "$BUCKET" --profile portfolio \
-  --server-side-encryption-configuration '{"Rules":[]}'
-```
+Deployed by `scripts/01-deploy-baseline.sh`, remediated by `scripts/01-remediate.sh`. IDs live in
+`.lab-env` (gitignored, mode 600).
 
-## What I did
+## Measurement, before remediation
 
-### 1. Enable the measurement layer
+| Tool / framework | Result |
+|---|---|
+| Prowler 5.49.0, full scan | **80 FAIL / 92 PASS** (46.5% pass) |
+| Prowler, CIS AWS Foundations 5.0 export | 57 fail / 56 pass, 113 check rows |
+| Prowler, NIST 800-53 Rev 5 export | 1,312 fail / 2,004 pass, 3,316 check rows |
+| Security Hub, AWS FSBP 1.0.0 | **8 FAILED, 2 PASSED, 306 NOT_AVAILABLE** |
 
-```bash
-aws cloudtrail create-trail --name lab-trail --s3-bucket-name "$BUCKET" --profile portfolio
-aws cloudtrail start-logging --name lab-trail --profile portfolio
+The compliance exports count rows, which expand per resource, so they are larger than the 172 checks
+in the primary scan. Prowler's own summary panel reports framework percentages at control level; the
+numbers above are counts from the exported CSVs so they can be re-derived with grep.
 
-aws securityhub enable-security-hub --profile portfolio
-aws securityhub describe-standards --profile portfolio \
-  --query 'Standards[].StandardsArn' --output text
-```
+### Why the two tools disagree, and why that matters
 
-Enable the two standards that matter and note the exact ARNs returned:
+`NOT_AVAILABLE` is not a pass and not a failure. It means the control could not be evaluated: no
+AWS Config recorder at baseline, standards only partially enabled, or a service the account does not
+use. That leaves Security Hub with an honest denominator of **10**, not 316 - a pass rate of 20%,
+against Prowler's 46.5% over a much wider rule set.
 
-```bash
-aws securityhub batch-enable-standards --profile portfolio \
-  --standards-subscription-requests \
-  StandardsArn=arn:aws:securityhub:us-east-1::standards/aws-foundational-security-best-practices/v/1.0.0
+Three consequences worth stating in an interview:
 
-aws securityhub batch-enable-standards --profile portfolio \
-  --standards-subscription-requests \
-  StandardsArn=arn:aws:securityhub:us-east-1::standards/cis-aws-foundations-benchmark/v/5.0.0
-```
+1. A dashboard percentage is meaningless without the denominator. `306 NOT_AVAILABLE` is the number a
+   reviewer should ask about first, and the number a slide deck usually hides.
+2. Security Hub is an aggregation and prioritisation layer. Prowler is a rule engine. Neither replaces
+   the other, and an account that looks green in one can be red in the other.
+3. Controls that cannot evaluate are a detection blind spot, not a clean bill of health. The fix is
+   enabling the prerequisite (Config, the standard, the service), not muting the finding.
 
-Then enable AWS Config recording (Security Hub needs it for several controls):
+## Findings fixed
 
-```bash
-aws configservice put-configuration-recorder --profile portfolio \
-  --configuration-recorder name=default,roleARN=arn:aws:iam::<acct>:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig \
-  --recording-group allSupported=true,includeGlobalResourceTypes=true
-aws configservice start-configuration-recorder --configuration-recorder-name default --profile portfolio
-```
+| # | Finding | Before | After | Evidence |
+|---|---|---|---|---|
+| 1 | Bucket readable by anyone on the internet | `BlockPublicAcls=true` only; other three blocks off; public `GetObject` statement; `curl` **200** | all four blocks true; `BucketOwnerEnforced`; public statement deleted; `curl` **403** | `bpa-before.json`, `bpa-after.json`, `curl-before.txt`, `curl-after.txt` |
+| 2 | SSH open to 0.0.0.0/0 | `IpPermissions` containing 22/tcp 0.0.0.0/0 | `IpPermissions: []`; rule `sgr-0bea3bb32ad3e868a` revoked | `sg-before.json`, `sg-after.json` |
+| 3 | Standing key and wildcard user | key `Active`, inline `s3:*` on `*` | key inactive then deleted; user and inline policy deleted | `access-keys-before.json`, `keys-after.json` (`[]`) |
+| 4 | IMDSv1 permitted | `HttpTokens: optional` | `HttpTokens: required`, `State: applied` | `imds-before.json`, `imds-after.json` |
+| 5 | No password policy (AWS default: 6 characters, no complexity) | `get-account-password-policy` returned `NoSuchEntity` | 14 chars, all four classes, reuse prevention 24, max age 90 | `password-policy-before.json`, `password-policy-after.json` |
+| 6 | No account-level Block Public Access | absent | all four true, account-wide | `bpa-account-after.json` |
 
-### 2. Run an independent scan
+Finding 1 has a detail worth keeping: `BlockPublicAcls` was already true. Partial public access
+blocking is the failure mode that makes a bucket *look* protected in the console while
+`IgnorePublicAcls`, `BlockPublicPolicy` and `RestrictPublicBuckets` are all doing nothing. Three of
+four is not a passing grade here.
 
-Security Hub tells you what AWS thinks. Prowler gives a second opinion and a portable report:
+Finding 3 is the one the original script got wrong. It deleted the access key and left the user with
+`s3:*` on `*` still attached. The key is a credential; the user's permissions are the finding. Deleting
+only the key removes the symptom and leaves the account failing the same control on the next scan.
 
-```bash
-prowler aws --profile portfolio --compliance cis_5.0_aws \
-  -M csv json-html --output-directory evidence/01-posture/raw
-```
+Finding 5 is stronger than "weak policy". `NoSuchEntity` means AWS was applying its default of a
+6-character minimum with no character requirements at all.
 
-Check the framework name first if that flag errors: `prowler aws --list-compliance`.
+## Accepted, not fixed
 
-### 3. Triage, do not fix everything
+| Item | Why it stays |
+|---|---|
+| `project_admin` has `AdministratorAccess` and a console password | Needs a decision, not a script: scope the policy, or delete the login profile and move to IAM Identity Center. Tracked as the top backlog item. |
+| Root | `AccountMFAEnabled: 1`, `AccountAccessKeysPresent: 0` - root MFA is on and there are no root keys. Root usage itself still needs review in CloudTrail. |
+| GuardDuty off, no organization trail, no EBS default encryption, unencrypted SNS topic, 16 missing CloudWatch alarms | Real findings, but they belong to project 2 (detection) and project 7 (response), where enabling them is the point rather than a side effect. |
 
-Sort by severity, then by exploitability. A useful triage rule:
+An audit that fixes everything is not an audit, it is a rebuild. Deciding what to leave, and being
+able to defend the choice, is the job.
 
-1. **Internet-reachable + data or compute** (public bucket, 0.0.0.0/0 to 22, public snapshot).
-2. **Identity choke points** (root keys, no MFA, wildcard admin).
-3. **Detection blind spots** (CloudTrail off, GuardDuty off, no flow logs).
-4. **Hygiene** (tags, versioning, unused keys).
+## What I got wrong, and what it cost
 
-Write one `templates/finding-report.md` per item you fix. Keep the list to five or fewer - depth
-beats a wall of failures.
+Recorded because these are the parts I would otherwise forget:
 
-### 4. Remediate
+- **`s3api put-public-access-block` cannot set the account-level block.** It requires `--bucket`
+  because it is namespaced to a bucket. The account switch lives in `s3control`, a different service
+  endpoint. The console shows one page with one set of switches and writes to both, which is exactly
+  why this is easy to get wrong.
+- **`get-account-password-policy` returns `NoSuchEntity`** when no policy has ever been set, not a
+  defaulted weak policy. The distinction changes the finding from "length 8" to "length 6, no
+  complexity".
+- **There is no `describe-instance-metadata-options` subcommand.** Metadata options are a field on
+  `describe-instances`.
+- **The password policy flags are `--require-uppercase-characters`**, not `-letters`.
+- **A name filter is not an inventory.** When cleaning up the 2024 leftovers, filtering roles by name
+  matched four of six; the two that were missed (`demo-lambda-role-dy1niio2`,
+  `SnowFamilyS3Import-demo-job-1-1`) only appeared when I enumerated every role's `CreateDate` and
+  looked for the year.
 
-```bash
-# Close the bucket
-aws s3api put-public-access-block --bucket "$BUCKET" --profile portfolio \
-  --public-access-block-configuration \
-  BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
-aws s3api put-bucket-encryption --bucket "$BUCKET" --profile portfolio \
-  --server-side-encryption-configuration \
-  '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+## Evidence index
 
-# Close SSH
-SG=$(aws ec2 describe-security-groups --filters Name=group-name,Values=lab-open-ssh \
-  --query 'SecurityGroups[0].GroupId' --output text --profile portfolio)
-aws ec2 revoke-security-group-ingress --group-id "$SG" --protocol tcp --port 22 \
-  --cidr 0.0.0.0/0 --profile portfolio
+| File | Supports |
+|---|---|
+| `raw/bpa-before.json`, `raw/bpa-after.json` | partial to complete public access blocking |
+| `raw/curl-before.txt` (200), `raw/curl-after.txt` (403) | the bucket was anonymously readable and no longer is |
+| `raw/acl-before.json` | ACL posture before `BucketOwnerEnforced` |
+| `raw/sg-before.json`, `raw/sg-after.json` | SSH rule present, then absent |
+| `raw/encryption-after.json` | SSE-S3 (`AES256`) applied by default, SSE-C blocked |
+| `raw/versioning-after.json` | versioning `Enabled` |
+| `raw/bucket-policy-after.txt` | `NoSuchBucketPolicy` - the public statement is gone, not hidden |
+| `raw/access-keys-before.json`, `raw/keys-after.json` | key existed, then none |
+| `raw/imds-before.json`, `raw/imds-after.json` | IMDSv1 permitted, then required |
+| `raw/password-policy-before.json` (`{"absent":true}`), `raw/password-policy-after.json` | no policy, then a strict one |
+| `raw/bpa-account-after.json` | account-level block, all four true |
+| `raw/account-summary-after.json` | users, MFA devices, no root keys, role counts |
+| `prowler-before/prowler-before.{csv,html,ocsf.json}` | full scan, redacted |
+| `prowler-before/compliance/cis_5.0_aws.csv`, `nist_800_53_r5.csv` | framework exports |
+| `raw/securityhub-before.json` | 8 FAILED / 2 PASSED / 306 NOT_AVAILABLE |
 
-# Kill the standing key, require MFA
-aws iam update-access-key --access-key-id <KEY_ID> --status Inactive --user-name lab-legacy-user --profile portfolio
-aws iam delete-access-key --access-key-id <KEY_ID> --user-name lab-legacy-user --profile portfolio
+Redaction: account ID masked in filenames and contents; the key ID and the SNS subscription email are
+masked in the Prowler exports; the instance public IP is masked. `scripts/redact-audit.sh` enforces
+this at commit time via `.githooks/pre-commit`.
 
-# Enforce IMDSv2 on the instance
-aws ec2 modify-instance-metadata-options --instance-id <ID> \
-  --http-tokens required --http-endpoint enabled --profile portfolio
-```
+## Interview questions
 
-### 5. Re-scan and compare
-
-```bash
-prowler aws --profile portfolio --compliance cis_5.0_aws \
-  -M csv json-html --output-directory evidence/01-posture/raw-after
-
-jq -r '.Status // .status' evidence/01-posture/raw/*.json 2>/dev/null | sort | uniq -c
-```
-
-Record PASS/FAIL counts before and after. That delta is the whole portfolio artifact.
-
-## Evidence
-
-| Artifact | Why it lands |
-|----------|--------------|
-| `before-after.csv` with control ID, severity, status before/after | Reviewers can audit your work in 30 seconds |
-| Security Hub score screenshot (before/after) | Native AWS view, hard to fake |
-| Prowler HTML report (redacted) | Third-party validation |
-| 3-5 finding reports | Shows written communication and remediation reasoning |
-| A one-paragraph executive summary | This is the actual job: brief decision-makers |
-
-## Result
-
-> Audited a deliberately misconfigured AWS account against CIS AWS Foundations 5.0 and AWS FSBP,
-> closing 9 of 12 high-severity findings in one remediation cycle and raising the Security Hub
-> security score from 41% to 78%. Eliminated public S3 exposure and unrestricted SSH ingress, removed
-> a standing IAM access key, and enforced IMDSv2.
+1. **"Security Hub says 306 NOT_AVAILABLE. Is the account secure?"** - It is unevaluated. `NOT_AVAILABLE`
+   means a missing prerequisite, usually Config or a partially enabled standard. The question I would
+   ask back is what the denominator is, because 8 failures out of 10 evaluated and 8 out of 316 are
+   very different claims.
+2. **"Your bucket had BlockPublicAcls on. Why was it still public?"** - Because the other three blocks
+   were off, and an ACL block does not stop a public bucket policy. Bucket policy grants and ACLs are
+   separate paths, which is why all four switches exist and why three of four is not partial credit.
+3. **"You deleted the access key. Was the finding closed?"** - No, and that was my first bug. The
+   user's inline `s3:*` was the finding. I had to delete the policy and the user too, and re-verify.
+4. **"How do you know your fix did not break anything?"** - For the bucket, the proof is the object
+   still exists and returns 403 anonymously while remaining readable to the owner; the application
+   path is validated separately. For SSH, closing the rule assumes you have another path in - here,
+   SSM Session Manager - and that assumption is the thing that gets checked before the rule is closed.
 
 ## At scale
 
-- Multi-account: Security Hub administrator account + Organizations, aggregate findings centrally.
-- Everything above as Terraform or CloudFormation in CI, so drift is caught before merge.
-- Exception workflow with owner, expiry, and compensating control - auditors care more about that
-  than a perfect score.
-
-## Likely interview questions
-
-1. **"Security Hub shows 300 findings. What do you do Monday morning?"** - Triage by exploitability
-   and blast radius, group by root cause, separate systemic fixes from one-offs, track mean time to
-   remediate per severity.
-2. **"CIS or FSBP?"** - CIS is prescriptive and audit-friendly; FSBP is AWS-native and mapped to
-   controls you can automate. Run both, remediate once, report against whichever the customer needs.
-3. **"How do you know the fix did not break the app?"** - Test the workload path after remediation,
-   keep the change reversible, and validate with a re-scan plus a functional check.
+- Aggregate Prowler across accounts with `--organizations-role`, and treat Security Hub as the
+  triage surface rather than the source of truth.
+- Everything here belongs in CI as Terraform or cfn-guard, so `BlockPublicPolicy=false` cannot merge.
+- An exception register with owner, expiry and compensating control matters more to an auditor than a
+  perfect score, because it proves someone is thinking rather than muting.
