@@ -1,0 +1,10 @@
+{
+    "InstanceId": "i-09bc37f318059ae62",
+    "Type": "t3.micro",
+    "PublicIp": "100.55.19.200",
+    "Groups": [
+        "sg-06ca5b1936920267e"
+    ],
+    "Metadata": "optional",
+    "IamProfile": null
+}
