@@ -1,21 +1,87 @@
-2024 course decommission - 2026-11-13T12:39:39Z
+2024 course decommission - 2026-11-13
 account: 58********27   region: us-east-1
 
-buckets removed (4 + 1):
-  vertidel-demo-s3              (world-readable, versions + delete markers)
+Why this exists: a baseline posture audit of an account I believed was clean
+turned up resources dated December 2024 from an AWS course. They were not
+visible in the console screens I normally look at, so they had sat there for
+almost two years.
+
+BUCKETS
+removed (5):
+  vertidel-demo-s3                                world-readable, versioned,
+                                                  contained delete markers
   vertidel-bucket-demo-storage-classes
-  vertidel-demo-replication-bucket-origin   (replication rule removed first)
+  vertidel-demo-replication-bucket-origin         replication rule deleted first,
+                                                  then versions, then bucket
   vertidel-demo-bucket-replication-target
-  cf-templates-1sx1audeebn9n-us-east-1      (RETENTION: recreated by CloudFormation)
+  elasticbeanstalk-us-east-1-58********27         see note below
 
-beanstalk: application MyApplication - no environments, no compute
-iam roles removed: AWS-Beanstalk-EC2-Role (instance profile removed first),
-  aws-elasticbeanstalk-service-role, s3crr_role_for_vertidel-demo-replication-bucket-origin
-iam local policy removed: s3crr_for_vertidel-demo-replication-bucket-origin_fc84ce
+retained (1):
+  cf-templates-1sx1audeebn9n-us-east-1            ~1.5 KB of CloudFormation
+                                                  templates, all four public
+                                                  access blocks on, and
+                                                  CloudFormation recreates it
+                                                  on the next deploy. Deleting
+                                                  it is pointless churn.
 
-retained: elasticbeanstalk-us-east-1-58********27
-  reason: bucket policy Sid eb-58950a8c... Deny s3:DeleteBucket to Principal *.
-  empty, 0 bytes, no public access. Explicit deny beats AdministratorAccess.
-kms: 2 alias/aws/* keys are service-managed, not deletable, no action.
+  note on the elasticbeanstalk bucket: its bucket policy carried
+  Sid eb-58950a8c-feb6-11e2-89e0-0800277d041b, a Deny of s3:DeleteBucket to
+  Principal *. An explicit deny in a resource policy beats an AdministratorAccess
+  identity policy, so delete-bucket failed even as root. The deny covered only
+  DeleteBucket, not DeleteBucketPolicy, so the fix was: delete the bucket
+  policy, then empty and delete the bucket.
 
-billable resources found: 0
+COMPUTE
+  Beanstalk application MyApplication: no environments existed, deleted.
+  No CloudFormation stacks, no ELB, no RDS, no NAT gateway, no DynamoDB,
+  no SQS, no CloudFront, no non-default VPC.
+  Remaining running instance: i-09bc37f318059ae62 (posture-lab) - intentional.
+
+IAM, first pass (removed earlier)
+  role   AWS-Beanstalk-EC2-Role               instance profile removed first
+  role   aws-elasticbeanstalk-service-role
+  role   s3crr_role_for_vertidel-demo-replication-bucket-origin
+  policy s3crr_for_vertidel-demo-replication-bucket-origin_fc84ce
+
+IAM, second pass (2026-11-13, after a name filter missed two roles)
+  role   s3crr_role_for_vertidel-demo-replication-origin       created 2024-12-19
+  role   s3crr_role_for_vertidel-demo-replication-origin_1     created 2024-12-19
+  role   demo-lambda-role-dy1niio2                             created 2024-12-23
+         last used 2024-12-23T16:42:12Z; its Lambda function no longer exists
+  role   SnowFamilyS3Import-demo-job-1-1                       created 2024-12-20
+         never used
+  role   EC2_Demo-role                                         created 2024-12-13
+         instance profile EC2_Demo-role removed, then role deleted;
+         held only arn:aws:iam::aws:policy/IAMReadOnlyAccess
+  role   rds-monitoring-role                                   created 2024-12-21
+         never used, no RDS instances existed; trust was
+         monitoring.rds.amazonaws.com only
+  policy s3crr_for_vertidel-demo-replication-origin_e992b9
+  policy s3crr_for_vertidel-demo-replication-origin_e57016
+  policy AWSLambdaBasicExecutionRole-37f52f1e-8ee2-4075-8728-763c77633e73
+  policy SnowFamilyS3Import-demo-job-1-1-policy
+
+  Each policy was checked with list-entities-for-policy before deletion and
+  each returned empty, so no user or group was using them.
+
+IAM, deliberately retained
+  AWSServiceRoleForAutoScaling, AWSServiceRoleForElasticLoadBalancing,
+  AWSServiceRoleForRDS   (created Dec 2024, same era, no customer permissions)
+  These are service-linked roles. They cannot be removed with delete-role
+  (DeleteConflict); they need delete-service-linked-role, and the service
+  recreates them the next time it is used. Nothing is gained by removing them.
+
+KMS
+  2 keys, alias/aws/rds and alias/aws/importexport, both KeyManager: AWS.
+  Service-managed, not deletable by the customer, no action.
+
+Lesson worth remembering
+  Filtering by name is how the first pass missed two of the six roles. The
+  check that actually closed this out was draining every role's CreateDate and
+  looking for the year, not searching for names I remembered.
+
+Billable resources found: 0
+Post-decommission verification: `aws iam list-roles` returns service-linked roles
+only. No customer-managed or customer-named role survives, and
+`list-policies --scope Local` is empty. The posture-lab instance never had an
+instance profile, which is itself one of the five deliberate findings.

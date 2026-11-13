@@ -110,12 +110,16 @@ Removed:
 | S3 bucket | `vertidel-bucket-demo-storage-classes` |
 | S3 bucket | `vertidel-demo-replication-bucket-origin` (replication rule removed first) |
 | S3 bucket | `vertidel-demo-bucket-replication-target` |
+| S3 bucket | `elasticbeanstalk-us-east-1-58********27` (bucket policy deleted first, see below) |
 | Beanstalk app | `MyApplication` (no environments, no compute attached) |
 | IAM role | `AWS-Beanstalk-EC2-Role` (+ its same-named instance profile) |
 | IAM role | `aws-elasticbeanstalk-service-role` |
 | IAM role | `s3crr_role_for_vertidel-demo-replication-bucket-origin` |
 | IAM role | `s3crr_role_for_vertidel-demo-replication-origin` (+ `_1` variant) |
-| IAM role | `EC2_Demo-role` |
+| IAM role | `EC2_Demo-role` (+ its same-named instance profile) |
+| IAM role | `demo-lambda-role-dy1niio2` (orphaned; its Lambda function was already gone) |
+| IAM role | `SnowFamilyS3Import-demo-job-1-1` (never used) |
+| IAM role | `rds-monitoring-role` (never used; no RDS instances existed) |
 | IAM policy | `s3crr_for_vertidel-demo-replication-bucket-origin_fc84ce` |
 | IAM policy | `s3crr_for_vertidel-demo-replication-origin_e57016`, `_e992b9` |
 | IAM policy | `AWSLambdaBasicExecutionRole-37f52f1e-...` |
@@ -128,9 +132,9 @@ Retained on purpose:
 
 | Resource | Reason |
 |---|---|
-| `elasticbeanstalk-us-east-1-58********27` | Empty, no public access block at all, and its bucket policy carries `Sid eb-58950a8c-...` denying `s3:DeleteBucket` to `Principal: *`. An explicit resource-policy deny cannot be overridden by `AdministratorAccess`. Removal would need the policy stripped first, or root in the console; tidiness did not justify either. |
 | `cf-templates-1sx1audeebn9n-us-east-1` | 1.5 KB of CloudFormation templates, all four public access blocks on. CloudFormation recreates it on the next deploy. |
 | 2 `alias/aws/*` KMS keys | `KeyManager: AWS`, service-managed, not deletable, created on first RDS and import/export use in Dec 2024. |
+| `AWSServiceRoleFor{RDS,AutoScaling,ElasticLoadBalancing}` | Service-linked roles from the same Dec 2024 era. `delete-role` returns `DeleteConflict` on them; they need `delete-service-linked-role`, and the service recreates them on next use. No customer permissions, no cost, so removal is churn. |
 
 ### The deny that beat administrator rights
 
@@ -142,10 +146,10 @@ AccessDenied ... s3:DeleteBucket ... with an explicit deny in a resource-based p
 ```
 
 AWS evaluates identity-based grants and resource-based denies separately, and a deny always wins.
-The bucket policy only denied `s3:DeleteBucket`, not `s3:DeleteBucketPolicy`, so
-`delete-bucket-policy` followed by `delete-bucket` would have worked. Left as-is deliberately, and
-recorded here because "we have admin, therefore we have control" is false in AWS and this is the
-proof.
+The bucket policy only denied `s3:DeleteBucket`, not `s3:DeleteBucketPolicy`, so the escape was
+`delete-bucket-policy` followed by `empty` and `delete-bucket` — which is what was eventually done.
+Recorded here because "we have admin, therefore we have control" is false in AWS, and this is the
+proof. Note the sequence matters: with the deny in place, `delete-bucket` fails even as root.
 
 Detection described in `evidence/01-posture/raw/decommission-2024-course.txt`,
 `stale-buckets-before.json`, and `stale-iam-before.json`.
