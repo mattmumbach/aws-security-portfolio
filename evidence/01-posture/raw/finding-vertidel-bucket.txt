@@ -1,0 +1,6 @@
+Discovered: Prowler scan, 2026-11-12
+Bucket: vertidel-demo-s3 (created 2024-12, course demo)
+Objects: coffee.jpg, beach.jpg, index.html (public assets, no PII)
+Policy: Allow Principal * s3:GetObject on /*
+Versioning: enabled - objects remained world-readable after delete
+Remediation: all versions deleted, bucket removed 2026-11-12

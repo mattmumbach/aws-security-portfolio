@@ -1,0 +1,19 @@
+# Paths excluded from the redaction audit. Format:
+#   ^path-regex$              exempt that path from every rule
+#   ^path-regex$|label        exempt that path from one rule only
+# Keep this list short and justified - every entry is a blind spot.
+
+# The audit's own rule table, the hook, and this file necessarily contain patterns.
+^scripts/redact-audit\.sh$
+^\.githooks/
+^scripts/redaction-allowlist\.txt$
+
+# Publishing docs: contains documented AWS example keys only.
+^docs/09-secrets-and-keys\.md$
+
+# .lab-env is gitignored and never committed; it holds resource IDs by design.
+^\.lab-env$
+
+# README is a deliberate contact surface - recruiters need a way to reach you.
+# Only the email rule is exempt; the file is still scanned for keys and account ids.
+^README\.md$|personal-email

@@ -1,0 +1,124 @@
+=== s3crr_role_for_vertidel-demo-replication-bucket-origin
+{
+    "Role": {
+        "Path": "/service-role/",
+        "RoleName": "s3crr_role_for_vertidel-demo-replication-bucket-origin",
+        "RoleId": "AROA****************4",
+        "Arn": "arn:aws:iam::58********27:role/service-role/s3crr_role_for_vertidel-demo-replication-bucket-origin",
+        "CreateDate": "2024-12-19T20:50:25+00:00",
+        "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": "s3.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                }
+            ]
+        },
+        "MaxSessionDuration": 3600,
+        "RoleLastUsed": {
+            "LastUsedDate": "2024-12-19T21:12:54+00:00",
+            "Region": "us-east-1"
+        }
+    }
+}
+{
+    "AttachedPolicies": [
+        {
+            "PolicyName": "s3crr_for_vertidel-demo-replication-bucket-origin_fc84ce",
+            "PolicyArn": "arn:aws:iam::58********27:policy/service-role/s3crr_for_vertidel-demo-replication-bucket-origin_fc84ce"
+        }
+    ]
+}
+{
+    "PolicyNames": []
+}
+=== AWS-Beanstalk-EC2-Role
+{
+    "Role": {
+        "Path": "/",
+        "RoleName": "AWS-Beanstalk-EC2-Role",
+        "RoleId": "AROA****************U",
+        "Arn": "arn:aws:iam::58********27:role/AWS-Beanstalk-EC2-Role",
+        "CreateDate": "2024-12-25T16:08:26+00:00",
+        "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": "ec2.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                }
+            ]
+        },
+        "Description": "Allows EC2 instances to call AWS services on your behalf.",
+        "MaxSessionDuration": 3600,
+        "RoleLastUsed": {}
+    }
+}
+{
+    "AttachedPolicies": [
+        {
+            "PolicyName": "AWSElasticBeanstalkMulticontainerDocker",
+            "PolicyArn": "arn:aws:iam::aws:policy/AWSElasticBeanstalkMulticontainerDocker"
+        },
+        {
+            "PolicyName": "AWSElasticBeanstalkWebTier",
+            "PolicyArn": "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier"
+        },
+        {
+            "PolicyName": "AWSElasticBeanstalkWorkerTier",
+            "PolicyArn": "arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier"
+        }
+    ]
+}
+{
+    "PolicyNames": []
+}
+=== aws-elasticbeanstalk-service-role
+{
+    "Role": {
+        "Path": "/service-role/",
+        "RoleName": "aws-elasticbeanstalk-service-role",
+        "RoleId": "AROA****************W",
+        "Arn": "arn:aws:iam::58********27:role/service-role/aws-elasticbeanstalk-service-role",
+        "CreateDate": "2024-12-25T16:09:50+00:00",
+        "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": "elasticbeanstalk.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                }
+            ]
+        },
+        "MaxSessionDuration": 3600,
+        "RoleLastUsed": {
+            "LastUsedDate": "2024-12-25T16:11:13+00:00",
+            "Region": "us-east-1"
+        }
+    }
+}
+{
+    "AttachedPolicies": [
+        {
+            "PolicyName": "AWSElasticBeanstalkEnhancedHealth",
+            "PolicyArn": "arn:aws:iam::aws:policy/service-role/AWSElasticBeanstalkEnhancedHealth"
+        },
+        {
+            "PolicyName": "AWSElasticBeanstalkManagedUpdatesCustomerRolePolicy",
+            "PolicyArn": "arn:aws:iam::aws:policy/AWSElasticBeanstalkManagedUpdatesCustomerRolePolicy"
+        }
+    ]
+}
+{
+    "PolicyNames": []
+}

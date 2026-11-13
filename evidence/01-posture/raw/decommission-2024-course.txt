@@ -1,0 +1,21 @@
+2024 course decommission - 2026-11-13T12:39:39Z
+account: 58********27   region: us-east-1
+
+buckets removed (4 + 1):
+  vertidel-demo-s3              (world-readable, versions + delete markers)
+  vertidel-bucket-demo-storage-classes
+  vertidel-demo-replication-bucket-origin   (replication rule removed first)
+  vertidel-demo-bucket-replication-target
+  cf-templates-1sx1audeebn9n-us-east-1      (RETENTION: recreated by CloudFormation)
+
+beanstalk: application MyApplication - no environments, no compute
+iam roles removed: AWS-Beanstalk-EC2-Role (instance profile removed first),
+  aws-elasticbeanstalk-service-role, s3crr_role_for_vertidel-demo-replication-bucket-origin
+iam local policy removed: s3crr_for_vertidel-demo-replication-bucket-origin_fc84ce
+
+retained: elasticbeanstalk-us-east-1-58********27
+  reason: bucket policy Sid eb-58950a8c... Deny s3:DeleteBucket to Principal *.
+  empty, 0 bytes, no public access. Explicit deny beats AdministratorAccess.
+kms: 2 alias/aws/* keys are service-managed, not deletable, no action.
+
+billable resources found: 0

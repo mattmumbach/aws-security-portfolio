@@ -1,7 +1,7 @@
 {
     "InstanceId": "i-09bc37f318059ae62",
     "Type": "t3.micro",
-    "PublicIp": "100.55.19.200",
+    "PublicIp": "100.55.**.**",
     "Groups": [
         "sg-06ca5b1936920267e"
     ],
