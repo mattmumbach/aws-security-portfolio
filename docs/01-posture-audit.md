@@ -15,7 +15,7 @@ behind by a 2024 course - documented in `00-account-inventory.md` and
 `evidence/01-posture/raw/decommission-2024-course.txt`.
 
 The most useful result is not the remediation. It is the disagreement between the two tools: Prowler
-reported 80 failing checks, Security Hub reported 8 failing findings out of 10 it could evaluate. A
+reported 80 failing findings across 53 failing checks, Security Hub reported 8 failing findings out of 10 it could evaluate. A
 scanner's score is a claim about coverage, not a measurement of the account.
 
 ## Environment
@@ -34,12 +34,12 @@ Deployed by `scripts/01-deploy-baseline.sh`, remediated by `scripts/01-remediate
 
 | Tool / framework | Result |
 |---|---|
-| Prowler 5.49.0, full scan | **80 FAIL / 92 PASS** (46.5% pass) |
+| Prowler 5.49.0, full scan | **80 FAIL / 92 PASS / 4 MANUAL** findings (53.5% pass); 53 of 82 checks failing |
 | Prowler, CIS AWS Foundations 5.0 export | 57 fail / 56 pass, 113 check rows |
 | Prowler, NIST 800-53 Rev 5 export | 1,312 fail / 2,004 pass, 3,316 check rows |
 | Security Hub, AWS FSBP 1.0.0 | **8 FAILED, 2 PASSED, 306 NOT_AVAILABLE** |
 
-The compliance exports count rows, which expand per resource, so they are larger than the 172 checks
+The compliance exports count rows, which expand per resource, so they are larger than the 176 findings (82 distinct checks)
 in the primary scan. Prowler's own summary panel reports framework percentages at control level; the
 numbers above are counts from the exported CSVs so they can be re-derived with grep.
 
@@ -48,7 +48,7 @@ numbers above are counts from the exported CSVs so they can be re-derived with g
 `NOT_AVAILABLE` is not a pass and not a failure. It means the control could not be evaluated: no
 AWS Config recorder at baseline, standards only partially enabled, or a service the account does not
 use. That leaves Security Hub with an honest denominator of **10**, not 316 - a pass rate of 20%,
-against Prowler's 46.5% over a much wider rule set.
+against Prowler's 53.5% over a much wider rule set.
 
 Three consequences worth stating in an interview:
 
@@ -82,13 +82,58 @@ only the key removes the symptom and leaves the account failing the same control
 Finding 5 is stronger than "weak policy". `NoSuchEntity` means AWS was applying its default of a
 6-character minimum with no character requirements at all.
 
+## Result: measurement after remediation
+
+The raw pass rate fell because I removed stale objects that were passing. Measured on the same
+resources in both scans, failing findings dropped from 57 to 50. I'd rather reduce attack surface and
+report a lower raw number than keep stale passes that make the account look better than it is.
+
+| Measure | Before | After | Comparable? |
+|---|---|---|---|
+| Findings, raw (FAIL / PASS / MANUAL) | 80 / 92 / 4 (176) | 50 / 53 / 4 (107) | No - population changed |
+| Finding-level pass rate, raw | 53.5% | 51.5% | No - population changed |
+| Same 106 resource-checks in both scans: FAIL | 57 | **50** | Yes |
+| Same 106 resource-checks: pass rate | 44.1% | **51.0%** | Yes |
+| Checks failing, worst resource wins | 53 of 82 | **45 of 78** | Mostly - 4 checks had no resources left |
+
+Prowler 5.49.0, same frameworks both phases (CIS 5.0, NIST 800-53 Rev 5). Derived by
+`scripts/01-compare.py` into `before-after.csv` (per check) and `before-after-findings.csv`
+(per check and resource).
+
+**Why the raw number moved the wrong way.** 70 findings disappeared between scans - 47 of them
+passes - because the 2024 course buckets and roles they described no longer exist. One more effect:
+with account-level Block Public Access on, Prowler stopped evaluating `s3_bucket_public_access` per
+bucket (8 rows, 2 FAIL) and recorded a single account-level PASS. Eight findings became one, with no
+change in what any bucket exposes. A finding-level pass rate rewards keeping correctly configured
+junk; it is the same denominator problem as Security Hub's 306 `NOT_AVAILABLE`.
+
+**Checks fixed (8), none regressed:** `ec2_instance_imdsv2_enabled`,
+`ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_22`, `iam_password_policy_minimum_length_14`,
+`iam_password_policy_reuse_24`, `iam_policy_attached_only_to_group_or_roles`,
+`s3_account_level_public_access_blocks`, `s3_bucket_level_public_access_block`,
+`s3_bucket_public_access`.
+
+**Still failing at critical or high (8)** - each is accepted below or belongs to a later project:
+
+| Severity | Check | Where it is handled |
+|---|---|---|
+| Critical | `iam_aws_attached_policy_no_administrative_privileges` | Fixed 2026-11-13: admin moved to Identity Center; `project_admin` has no key and no password, deletion pending. Not yet re-scanned |
+| High | `iam_user_mfa_enabled_console_access` | Fixed 2026-11-13: `project_admin` login profile removed; Identity Center requires MFA. Not yet re-scanned |
+| High | `iam_avoid_root_usage` | Reviewed, accepted - see below |
+| High | `guardduty_is_enabled` | project 2 |
+| High | `ec2_ebs_default_encryption` | Fixed 2026-11-13: enabled in us-east-1 (`raw/ebs-default-encryption-after.json`) |
+| High | `ec2_ebs_volume_encryption` | lab instance root volume; default encryption does not apply to existing volumes, so this closes at teardown |
+| High | `ec2_networkacl_allow_ingress_any_port` | Accepted - see below |
+| High | `sns_topics_kms_encryption_at_rest_enabled` | Accepted - see below |
+
 ## Accepted, not fixed
 
 | Item | Why it stays |
 |---|---|
-| `project_admin` has `AdministratorAccess` and a console password | Needs a decision, not a script: scope the policy, or delete the login profile and move to IAM Identity Center. Tracked as the top backlog item. |
-| Root | `AccountMFAEnabled: 1`, `AccountAccessKeysPresent: 0` - root MFA is on and there are no root keys. Root usage itself still needs review in CloudTrail. |
-| GuardDuty off, no organization trail, no EBS default encryption, unencrypted SNS topic, 16 missing CloudWatch alarms | Real findings, but they belong to project 2 (detection) and project 7 (response), where enabling them is the point rather than a side effect. |
+| Root usage (`iam_avoid_root_usage`, High) | Root was used on 2026-11-12, 15:05-15:08, to delete an old IAM user and create the first admin before Identity Center existed - 84 events, all in that window (`raw/root-usage-review.json`). All administration since then goes through Identity Center. Root keeps MFA and has no access keys, and is reserved for root-only tasks. The check looks back over recent history, so it will keep failing for a while. |
+| Default VPC NACL allows all inbound (`ec2_networkacl_allow_ingress_any_port`, High; also the port 22 and 3389 NACL checks) | Tightening it adds friction without adding security this environment needs: security groups already filter at the instance, there is no sensitive data, and nothing operational depends on the account, so a redundant defense-in-depth layer is not warranted here. A working NACL would still need inbound 1024-65535 for return traffic, which keeps the 3389 check failing unless explicit denies are numbered ahead of it, and NACL drops show up as silent timeouts in later labs. Accepted 2026-11-13. Revisit if the account ever holds sensitive data or production workloads; use a dedicated NACL on that subnet rather than editing the default one. |
+| SNS topic `sec-lab-budget` not KMS-encrypted (`sns_topics_kms_encryption_at_rest_enabled`, High) | The topic carries budget alerts only - a dollar amount and a threshold, no sensitive data. AWS Budgets can only publish to an encrypted topic through a customer-managed KMS key whose policy grants it access (the AWS-managed `aws/sns` key policy cannot be edited), so the fix costs ~1 USD/month and adds a way for alerts to fail silently. Accepted 2026-11-13. Revisit if the topic ever carries anything beyond budget alerts. |
+| GuardDuty off, no organization trail, 16 missing CloudWatch alarms | Real findings, but they belong to project 2 (detection) and project 7 (response), where enabling them is the point rather than a side effect. |
 
 An audit that fixes everything is not an audit, it is a rebuild. Deciding what to leave, and being
 able to defend the choice, is the job.
@@ -111,6 +156,19 @@ Recorded because these are the parts I would otherwise forget:
   matched four of six; the two that were missed (`demo-lambda-role-dy1niio2`,
   `SnowFamilyS3Import-demo-job-1-1`) only appeared when I enumerated every role's `CreateDate` and
   looked for the year.
+- **I reported the fail rate as the pass rate.** The first draft said "46.5% pass". 80 of 172
+  PASS/FAIL findings failed, so 46.5% was the fail rate; the pass rate was 53.5%. It also said "172
+  checks" when there were 176 findings across 82 checks. Re-derived from the CSV, not the console.
+- **The scan script would have dropped both frameworks silently.** It confirmed a framework existed by
+  matching a whole line of `prowler aws --list-compliance`, but that output prints `- cis_5.0_aws`
+  with a banner and colour codes, so the match never succeeded. The after-scan would have run with no
+  CIS or NIST export and no error. The script now checks for the framework definition file Prowler
+  ships, which is an exact match by construction.
+- **The comparison script reported nothing, and would have said so calmly.** Prowler 5 CSV is
+  `;`-delimited; read with the default comma, the header became two nonsense columns, no `CHECK_ID`
+  was found, and every row was skipped. It also kept only the last resource per check, so a check
+  failing on one bucket and passing on seven could score either way depending on row order.
+  Same pattern as the Config recorder: a tool reporting success while doing less than assumed.
 
 ## Evidence index
 
@@ -131,6 +189,9 @@ Recorded because these are the parts I would otherwise forget:
 | `prowler-before/prowler-before.{csv,html,ocsf.json}` | full scan, redacted |
 | `prowler-before/compliance/cis_5.0_aws.csv`, `nist_800_53_r5.csv` | framework exports |
 | `raw/securityhub-before.json` | 8 FAILED / 2 PASSED / 306 NOT_AVAILABLE |
+| `prowler-after/prowler-after.{csv,html,ocsf.json}`, `prowler-after/compliance/` | after-scan, same frameworks, redacted |
+| `before-after.csv` | per-check delta: 8 fixed, 0 regressed, 4 gone |
+| `before-after-findings.csv` | per check and resource: 7 fixed, 70 gone, 1 new |
 
 Redaction: account ID masked in filenames and contents; the key ID and the SNS subscription email are
 masked in the Prowler exports; the instance public IP is masked. `scripts/redact-audit.sh` enforces

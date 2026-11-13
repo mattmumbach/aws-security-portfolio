@@ -36,6 +36,9 @@ RULES=(
   "BLOCK|private-key-block|-----BEGIN [A-Z ]*PRIVATE KEY-----"
   "BLOCK|personal-email|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
   "BLOCK|local-home-path|/Users/[A-Za-z0-9._-]+"
+  # North American phone numbers with separators: 202-555-0147, (202) 555-0147, +1 202.555.0147.
+  # Separators are required so timestamps, IDs and digit runs do not match.
+  "BLOCK|phone-number|(^|[^0-9])(\\+?1[ .-]?)?\\(?[2-9][0-9]{2}\\)?[ .-][0-9]{3}[ .-][0-9]{4}([^0-9]|$)"
   "WARN|aws-resource-id|(i|sg|vol|snap|ami|vpc|subnet|eni|rtb|igw|acl)-[0-9a-f]{8,17}"
   "WARN|ipv4|([0-9]{1,3}\\.){3}[0-9]{1,3}"
   "WARN|hostname-internal|[A-Za-z0-9-]+\\.(internal|compute\\.internal|local)\\b"
@@ -119,6 +122,13 @@ while IFS= read -r f; do
     fi
   done
 
+  # The content scan below skips binary files, and PDFs and Office documents are
+  # binary (compressed). That is how a phone number reached git inside a PDF.
+  # Since their contents cannot be checked, the files themselves are blocked.
+  if [[ "$f" =~ \.(pdf|PDF|docx?|xlsx?|pptx?|odt|rtf)$ ]] && ! is_allowlisted "$f" "binary-document"; then
+    emit "BLOCK" "binary-document" "$f" " (filename)" "contents cannot be scanned - keep documents out of the repo, or allowlist after reading it"
+  fi
+
   content_of "$f" > "$TMP" 2>/dev/null || continue
   [[ -s "$TMP" ]] || continue
   grep -Iq . "$TMP" || continue   # skip binary
@@ -149,6 +159,8 @@ Account ids and ARNs:      s/582257684827/58********27/g
 Emails:                    replace with a role address or remove the field
 Access keys:               delete the credential, never store a redacted copy
 Local paths:               s|/Users/[user]|~|  or strip from the evidence line
+Phone numbers:             remove; contact details live on the resume, not in the repo
+Binary documents:          move out of the repo (resumes, PDFs) - the gate cannot read them
 Filenames:                 rename the artifact, then regenerate
 EOF
   exit 1

@@ -1,0 +1,7 @@
+# Project 1 teardown verification
+# 2026-11-13T20:40:52Z, profile lab-admin, region us-east-1
+bucket           gone
+instance         gone
+security-group   gone
+iam-user         gone
+instance state:  terminated
