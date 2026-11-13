@@ -6,9 +6,10 @@ implementing NIST 800-53 controls and building AWS-native posture, detection, an
 CISSP, GPEN, GCIA, AWS Certified Cloud Practitioner
 [mattmumbach@protonmail.com](mailto:mattmumbach@protonmail.com) | [linkedin.com/in/mattmumbach](https://linkedin.com/in/mattmumbach)
 
-Hands-on AWS security work: posture management, threat detection, storage hardening, IAM least
-privilege, threat hunting, incident response, policy as code, secrets protection, and multi-cloud
-control comparison.
+Hands-on AWS security work, built and documented one project at a time. Done: a posture audit of a
+live account with Prowler and Security Hub, remediation proven with before/after evidence, and the
+account's admin moved from a long-lived IAM user to Identity Center with MFA. Next: threat detection,
+policy as code against NIST 800-53, IAM least privilege, and incident response.
 
 Every project follows the same evidence-driven loop:
 
@@ -19,19 +20,19 @@ a hiring manager rather than for a lab notebook.
 
 ## Portfolio at a glance
 
-| # | Project | Core AWS services | Evidence a reviewer opens first |
-|---|---------|-------------------|----------------------------------|
-| 1 | Cloud security posture audit | Security Hub, Config, Prowler | Before/after CIS scorecard |
-| 2 | Threat detection and monitoring | CloudTrail, GuardDuty, EventBridge | Triage sheet for one finding |
-| 3 | S3 hardening and data exposure | S3, IAM, KMS, CloudTrail | Public-access before/after proof |
-| 4 | IAM audit and least privilege | IAM, Access Analyzer, CloudTrail | Permissions reduced, access still works |
-| 5 | Multi-cloud detection | GuardDuty, Defender for Cloud | Side-by-side detection comparison |
-| 6 | Threat hunting with logs | CloudTrail, Athena, VPC Flow Logs | Hypothesis -> query -> timeline |
-| 7 | Incident response runbook | IAM, EC2, GuardDuty, CloudTrail | Timestamped IR timeline |
-| 8 | Compliance with policy as code | Config, conformance packs, cfn-guard | Non-compliant -> auto-remediated |
-| 9 | Secrets and key protection | Secrets Manager, KMS, CloudTrail | Rotation and access-audit proof |
-| 10 | Multi-cloud architecture comparison | AWS baseline vs Azure/GCP | Control-by-control trade-off matrix |
-| 11 | Agentic AI workload hardening (capstone) | Amazon Bedrock, Lambda tool roles, Guardrails | Injection test matrix plus tool-scope policy diff |
+| # | Project | Status | Core AWS services | Evidence a reviewer opens first |
+|---|---------|--------|-------------------|----------------------------------|
+| 1 | Cloud security posture audit | Done | Security Hub, Config, Prowler | Before/after CIS scorecard |
+| 2 | Threat detection and monitoring | Planned | CloudTrail, GuardDuty, EventBridge | Triage sheet for one finding |
+| 3 | S3 hardening and data exposure | Cut (folded into 1) | S3, IAM, KMS, CloudTrail | Public-access before/after proof |
+| 4 | IAM audit and least privilege | Planned | IAM, Access Analyzer, CloudTrail | Permissions reduced, access still works |
+| 5 | Multi-cloud detection | Cut | GuardDuty, Defender for Cloud | Side-by-side detection comparison |
+| 6 | Threat hunting with logs | Cut | CloudTrail, Athena, VPC Flow Logs | Hypothesis -> query -> timeline |
+| 7 | Incident response runbook | Planned | IAM, EC2, GuardDuty, CloudTrail | Timestamped IR timeline |
+| 8 | Compliance with policy as code | Planned | Config, conformance packs, cfn-guard | Non-compliant -> auto-remediated |
+| 9 | Secrets and key protection | Cut | Secrets Manager, KMS, CloudTrail | Rotation and access-audit proof |
+| 10 | Multi-cloud architecture comparison | Cut | AWS baseline vs Azure/GCP | Control-by-control trade-off matrix |
+| 11 | Agentic AI workload hardening (capstone) | Cut (bounded version folded into 2) | Amazon Bedrock, Lambda tool roles, Guardrails | Injection test matrix plus tool-scope policy diff |
 
 ## Start here
 
