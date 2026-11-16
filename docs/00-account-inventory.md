@@ -74,7 +74,7 @@ rules and conformance packs (project 8).
    legacy `allSupported`/`includeGlobalResourceTypes` booleans returns
    `InvalidRecordingGroupException`. The legacy shape on its own works.
 
-These are better interview material than a clean run: each one is a case of a control reporting
+These are more useful than a clean run: each one is a case of a control reporting
 healthy while doing less than assumed.
 
 ## Verification commands used

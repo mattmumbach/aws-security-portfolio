@@ -50,7 +50,7 @@ AWS Config recorder at baseline, standards only partially enabled, or a service 
 use. That leaves Security Hub with an honest denominator of **10**, not 316 - a pass rate of 20%,
 against Prowler's 53.5% over a much wider rule set.
 
-Three consequences worth stating in an interview:
+Three consequences follow:
 
 1. A dashboard percentage is meaningless without the denominator. `306 NOT_AVAILABLE` is the number a
    reviewer should ask about first, and the number a slide deck usually hides.
@@ -196,22 +196,6 @@ Recorded because these are the parts I would otherwise forget:
 Redaction: account ID masked in filenames and contents; the key ID and the SNS subscription email are
 masked in the Prowler exports; the instance public IP is masked. `scripts/redact-audit.sh` enforces
 this at commit time via `.githooks/pre-commit`.
-
-## Interview questions
-
-1. **"Security Hub says 306 NOT_AVAILABLE. Is the account secure?"** - It is unevaluated. `NOT_AVAILABLE`
-   means a missing prerequisite, usually Config or a partially enabled standard. The question I would
-   ask back is what the denominator is, because 8 failures out of 10 evaluated and 8 out of 316 are
-   very different claims.
-2. **"Your bucket had BlockPublicAcls on. Why was it still public?"** - Because the other three blocks
-   were off, and an ACL block does not stop a public bucket policy. Bucket policy grants and ACLs are
-   separate paths, which is why all four switches exist and why three of four is not partial credit.
-3. **"You deleted the access key. Was the finding closed?"** - No, and that was my first bug. The
-   user's inline `s3:*` was the finding. I had to delete the policy and the user too, and re-verify.
-4. **"How do you know your fix did not break anything?"** - For the bucket, the proof is the object
-   still exists and returns 403 anonymously while remaining readable to the owner; the application
-   path is validated separately. For SSH, closing the rule assumes you have another path in - here,
-   SSM Session Manager - and that assumption is the thing that gets checked before the rule is closed.
 
 ## At scale
 

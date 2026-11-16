@@ -8,3 +8,10 @@ __pycache__/
 *.key
 evidence/**/secrets*
 evidence/**/*.tfstate
+
+# Working material, kept on disk and out of the public repo.
+# The repo holds finished work only.
+CLAUDE.md
+HANDOFF.md
+notes/
+plans/

@@ -8,9 +8,6 @@
 ^\.githooks/
 ^scripts/redaction-allowlist\.txt$
 
-# Publishing docs: contains documented AWS example keys only.
-^docs/09-secrets-and-keys\.md$
-
 # .lab-env is gitignored and never committed; it holds resource IDs by design.
 ^\.lab-env$
 
