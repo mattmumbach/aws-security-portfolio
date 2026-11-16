@@ -31,6 +31,11 @@ RULES=(
   "BLOCK|account-id-in-arn|arn:aws[a-z-]*:[a-z0-9-]+:[a-z0-9-]*:[0-9]{12}:"
   "BLOCK|account-id|(^|[^0-9])[0-9]{12}([^0-9]|$)"
   "BLOCK|access-key-id|(AKIA|ASIA)[0-9A-Z]{16}"
+  # IAM unique IDs issued in the current format base32-encode the owning account ID after the
+  # four-letter prefix, so they leak it exactly as an access key ID does. Current-format IDs have a
+  # fifth character in Q-Z or 2-7; older ones (AWS-managed policies, ANPAI.../ANPAJ...) do not
+  # encode an account and stay at WARN. Mask as AIDA**************** (prefix kept, rest starred).
+  "BLOCK|iam-unique-id-encodes-account|(AIDA|AROA|AGPA|ANPA|AIPA|APKA|ASCA)[Q-Z2-7][A-Z2-7]{15}"
   "WARN|iam-unique-id|(AIDA|AROA|AGPA|ANPA|AIPA|APKA)[0-9A-Z]{16}"
   "BLOCK|secret-access-key|aws_secret_access_key"
   "BLOCK|private-key-block|-----BEGIN [A-Z ]*PRIVATE KEY-----"
