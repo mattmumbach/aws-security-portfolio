@@ -40,9 +40,7 @@ a hiring manager rather than for a lab notebook.
    6-week schedule, sanitization rules. Read this before touching the console.
 2. Work the project docs in order. Projects 1, 2, 4, and 7 form the strongest interview narrative and
    can be finished in about three weekends.
-3. `docs/90-recruiter-and-interview-pack.md` - resume bullets, 90-second demo scripts, STAR stories,
-   ATS keyword map.
-4. `templates/` - finding report, incident runbook, evidence index. Copy, do not invent a new format.
+3. `templates/` - finding report, incident runbook, evidence index. Copy, do not invent a new format.
 
 ## Repository layout
 
@@ -62,8 +60,7 @@ a hiring manager rather than for a lab notebook.
 │   ├── 09-secrets-and-keys.md
 │   ├── 10-architecture-comparison.md
 │   ├── 11-agentic-ai-security.md
-│   ├── 12-ai-retrofit-notes.md
-│   └── 90-recruiter-and-interview-pack.md
+│   └── 12-ai-retrofit-notes.md
 ├── templates/
 │   ├── finding-report.md
 │   ├── ir-runbook.md
