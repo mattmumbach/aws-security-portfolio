@@ -2,3 +2,7 @@ Check for a GuardDuty finding after the password policy change, run 2026-11-17T1
 Action: minimum password length 14 -> 8 at 2026-11-17T16:50:11Z, restored to 14 at 16:50:12Z (CloudTrail, both calls succeeded).
 GuardDuty findings in the detector, all types: 3
 GuardDuty findings of type Stealth:IAMUser/PasswordPolicyChange: 0
+
+Second check, run 2026-11-17T19:55:59Z
+GuardDuty findings in the detector, all types: 3
+GuardDuty findings of type Stealth:IAMUser/PasswordPolicyChange: 0
