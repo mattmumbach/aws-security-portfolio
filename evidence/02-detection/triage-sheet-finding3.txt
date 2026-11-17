@@ -1,0 +1,55 @@
+TRIAGE SHEET
+generated 2026-11-17T18:20:44Z by scripts/02-triage.py
+
+1. What happened, and how bad (GuardDuty finding)
+  type                       Stealth:IAMUser/CloudTrailLoggingDisabled
+  title                      An AWS CloudTrail trail org-trail was disabled.
+  severity                   2.0
+  sample finding             no
+  api called                 StopLogging on cloudtrail.amazonaws.com
+  event first seen           2026-11-17T14:00:17.000Z
+  finding created            2026-11-17T14:18:35.303Z
+  time to detect             18 min 18 s
+
+2. Who and from where, according to the finding
+  principal                  AWSReservedSSO_AdministratorAccess_e5617a3f6dcf8c2a
+  principal type             AssumedRole
+  access key id              ASIA****************
+  remote ip                  x.x.x.x
+
+3. The matching CloudTrail record (StopLogging)
+  event time                 2026-11-17T14:00:17Z
+  caller                     arn:aws:sts::58********27:assumed-role/AWSReservedSSO_AdministratorAccess_e5617a3f6dcf8c2a/lab_admin
+  session name               lab_admin
+  identity center user       recorded (onBehalfOf present)
+  source ip                  x.x.x.x
+  source ip = finding ip     YES
+  tool (user agent)          aws-cli/2.34.20 md/awscrt#0.31.2 ua/2.
+  command (user agent)       cloudtrail.stop-logging
+  result                     succeeded (no error code)
+  request                    {"name": "org-trail"}
+
+4. Everything this access key did, 13:55:17 to 14:05:17 UTC (18 calls)
+  13:56:21  LookupEvents                 cloudtrail  
+  13:56:21  LookupEvents                 cloudtrail  
+  13:56:22  ListUsers                    iam         
+  13:56:22  ListBuckets                  s3          
+  13:56:50  GetTrailStatus               cloudtrail  
+  13:59:14  GetTrailStatus               cloudtrail  
+  14:00:17  StopLogging                  cloudtrail     <- changes something
+  14:00:17  StartLogging                 cloudtrail     <- changes something
+  14:00:18  GetTrailStatus               cloudtrail  
+  14:00:37  ListDetectors                guardduty   
+  14:00:38  GetFindings                  guardduty   
+  14:00:38  ListFindings                 guardduty   
+  14:04:10  ListDetectors                guardduty   
+  14:04:11  GetFindings                  guardduty   
+  14:04:11  ListFindings                 guardduty   
+  14:04:46  ListDetectors                guardduty   
+  14:04:46  ListFindings                 guardduty   
+  14:04:47  GetFindings                  guardduty   
+  distinct source ips        1
+  distinct session names     lab_admin
+  calls that change something StopLogging, StartLogging
+
+Verdict (analyst): ______  true positive / benign or expected / false positive

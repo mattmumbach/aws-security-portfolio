@@ -31,3 +31,33 @@ Time to triage = verdict minus created.
   is a guided first run. Full record: `triage-finding3.md`.
 - No timed triage has yet been done unguided or with a script. Those are the two numbers the
   write-up needs.
+
+## Handling time: console against script
+
+Created-to-verdict mixes two things: how long a finding waits before someone picks it up, and how
+long the work takes. To compare methods, handling time was measured on its own: from starting work
+on a finding to having the answers to the six triage questions. Both runs use finding 3, the one
+real finding. The answer was already known, so these runs measure how long each method takes to
+produce the evidence, not how long the analysis takes.
+
+| Method | Start (UTC) | Stop (UTC) | Handling time | Files |
+|---|---|---|---|---|
+| Console, by hand, unguided | 2026-11-17 18:15:40 | 18:19:06 | 3 min 26 s | `raw/timing-console-start.txt`, `raw/timing-console-stop.txt` |
+| Script (`scripts/02-triage.py`) | 2026-11-17 18:20:40 | 18:22:44 | 2 min 4 s | `raw/timing-script-start.txt`, `raw/timing-script-stop.txt`, `triage-sheet-finding3.txt` |
+
+Console run, what was written down: CloudTrail logging disabled; severity shown as "Low" with no
+number; caller an assumed role, `AWSReservedSSO_AdministratorAccess_...`, from one remote IP
+address, with the address's city and network owner shown; event first and last seen 14:00:17 UTC;
+finding created 14:18:35 UTC; the same key restarted logging at 14:00:17 UTC. Not written down in
+this run: the session name (`lab_admin`) and the tool used, both of which are in the CloudTrail
+event record. An earlier attempt at this run was interrupted and discarded.
+
+Script run, what was written down: CloudTrail logging disabled on `org-trail`; severity 2.0; IP
+address masked on the sheet; assumed role `AWSReservedSSO_AdministratorAccess_...` with session name
+`lab_admin`; event first and last seen 14:00:17 UTC; finding created 14:18:35 UTC; the same key
+restarted logging at 14:00:17 UTC. The script run captured the numeric severity and the session
+name, which the console run did not. The script itself ran in about three seconds; the rest of the
+time was reading the sheet.
+
+Limits of this comparison: one finding, one run of each method, the console run done first, and
+the answer known in advance. It shows the direction of the difference, not its size.
