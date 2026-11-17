@@ -1,0 +1,17 @@
+--------------------------------------
+|      GetRemainingFreeTrialDays     |
++------------------------------+-----+
+|  CLOUD_TRAIL                 |  30 |
+|  DNS_LOGS                    |  30 |
+|  FLOW_LOGS                   |  30 |
+|  S3_DATA_EVENTS              |  30 |
+|  EKS_AUDIT_LOGS              |  30 |
+|  EBS_MALWARE_PROTECTION      |  30 |
+|  RDS_LOGIN_EVENTS            |  30 |
+|  RDS_DATA_RISK               |  30 |
+|  EKS_RUNTIME_MONITORING      |  30 |
+|  LAMBDA_NETWORK_LOGS         |  30 |
+|  FARGATE_RUNTIME_MONITORING  |  30 |
+|  EC2_RUNTIME_MONITORING      |  30 |
+|  AI_PROTECTION               |  30 |
++------------------------------+-----+

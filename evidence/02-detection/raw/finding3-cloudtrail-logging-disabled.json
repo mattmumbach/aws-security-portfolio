@@ -1,0 +1,60 @@
+{
+  "Findings": [
+    {
+      "AccountId": "58********27",
+      "Arn": "arn:aws:guardduty:us-east-1:58********27:detector/28d0f302db8fa0018dfcfa58660a3eab/finding/8cd0f4efdbd3a0e42cff55b29a9463b1",
+      "CreatedAt": "2026-11-17T14:18:35.303Z",
+      "Description": "AWS CloudTrail trail org-trail was disabled by AWSReservedSSO_AdministratorAccess_e5617a3f6dcf8c2a calling StopLogging under unusual circumstances. This can be attackers attempt to cover their tracks by eliminating any trace of activity performed while they accessed your account.",
+      "Id": "8cd0f4efdbd3a0e42cff55b29a9463b1",
+      "Partition": "aws",
+      "Region": "us-east-1",
+      "Resource": {
+        "AccessKeyDetails": {
+          "AccessKeyId": "ASIA****************",
+          "PrincipalId": "AROA****************:lab_admin",
+          "UserName": "AWSReservedSSO_AdministratorAccess_e5617a3f6dcf8c2a",
+          "UserType": "AssumedRole"
+        },
+        "ResourceType": "AccessKey"
+      },
+      "SchemaVersion": "2.0",
+      "Service": {
+        "Action": {
+          "ActionType": "AWS_API_CALL",
+          "AwsApiCallAction": {
+            "Api": "StopLogging",
+            "CallerType": "Remote IP",
+            "RemoteIpDetails": {
+              "City": "masked",
+              "Country": {
+                "CountryName": "United States"
+              },
+              "GeoLocation": "masked",
+              "IpAddressV4": "x.x.x.x",
+              "Organization": "masked"
+            },
+            "ServiceName": "cloudtrail.amazonaws.com",
+            "AffectedResources": {
+              "AWS::CloudTrail::Trail": "org-trail"
+            }
+          }
+        },
+        "Archived": false,
+        "Count": 1,
+        "DetectorId": "28d0f302db8fa0018dfcfa58660a3eab",
+        "EventFirstSeen": "2026-11-17T14:00:17.000Z",
+        "EventLastSeen": "2026-11-17T14:00:17.000Z",
+        "ResourceRole": "TARGET",
+        "ServiceName": "guardduty",
+        "AdditionalInfo": {
+          "Value": "{}",
+          "Type": "default"
+        }
+      },
+      "Severity": 2.0,
+      "Title": "An AWS CloudTrail trail org-trail was disabled.",
+      "Type": "Stealth:IAMUser/CloudTrailLoggingDisabled",
+      "UpdatedAt": "2026-11-17T14:18:35.303Z"
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+Email from AWS Notifications observed in inbox at 16:02 local time (UTC-5), i.e. 21:02 UTC, on 2026-11-16.
+Recorded to the minute, as reported by Matt; not a machine timestamp.

@@ -1,0 +1,5 @@
+{
+    "Name": "guardduty-high",
+    "State": "ENABLED",
+    "EventPattern": "{\"source\":[\"aws.guardduty\"],\"detail-type\":[\"GuardDuty Finding\"],\"detail\":{\"severity\":[{\"numeric\":[\">=\",7]}]}}"
+}

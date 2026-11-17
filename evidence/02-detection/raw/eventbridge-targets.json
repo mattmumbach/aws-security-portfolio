@@ -1,0 +1,6 @@
+{
+    "TargetCount": 1,
+    "TargetIds": [
+        "gd-alerts-sns"
+    ]
+}

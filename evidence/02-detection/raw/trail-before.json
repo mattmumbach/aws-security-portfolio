@@ -1,0 +1,10 @@
+[
+    {
+        "Name": "org-trail",
+        "HomeRegion": "us-east-1",
+        "MultiRegion": true,
+        "OrgTrail": false,
+        "LogFileValidation": true,
+        "GlobalServiceEvents": true
+    }
+]

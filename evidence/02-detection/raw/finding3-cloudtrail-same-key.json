@@ -1,0 +1,110 @@
+[
+    {
+        "Time": "2026-11-17T08:56:21-05:00",
+        "Event": "LookupEvents",
+        "Source": "cloudtrail.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T08:56:21-05:00",
+        "Event": "LookupEvents",
+        "Source": "cloudtrail.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T08:56:22-05:00",
+        "Event": "ListUsers",
+        "Source": "iam.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T08:56:22-05:00",
+        "Event": "ListBuckets",
+        "Source": "s3.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T08:56:50-05:00",
+        "Event": "GetTrailStatus",
+        "Source": "cloudtrail.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T08:59:14-05:00",
+        "Event": "GetTrailStatus",
+        "Source": "cloudtrail.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T09:00:17-05:00",
+        "Event": "StopLogging",
+        "Source": "cloudtrail.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T09:00:17-05:00",
+        "Event": "StartLogging",
+        "Source": "cloudtrail.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T09:00:18-05:00",
+        "Event": "GetTrailStatus",
+        "Source": "cloudtrail.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T09:00:37-05:00",
+        "Event": "ListDetectors",
+        "Source": "guardduty.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T09:00:38-05:00",
+        "Event": "GetFindings",
+        "Source": "guardduty.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T09:00:38-05:00",
+        "Event": "ListFindings",
+        "Source": "guardduty.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T09:04:10-05:00",
+        "Event": "ListDetectors",
+        "Source": "guardduty.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T09:04:11-05:00",
+        "Event": "GetFindings",
+        "Source": "guardduty.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T09:04:11-05:00",
+        "Event": "ListFindings",
+        "Source": "guardduty.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T09:04:46-05:00",
+        "Event": "ListDetectors",
+        "Source": "guardduty.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T09:04:46-05:00",
+        "Event": "ListFindings",
+        "Source": "guardduty.amazonaws.com",
+        "User": "lab_admin"
+    },
+    {
+        "Time": "2026-11-17T09:04:47-05:00",
+        "Event": "GetFindings",
+        "Source": "guardduty.amazonaws.com",
+        "User": "lab_admin"
+    }
+]
