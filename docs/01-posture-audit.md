@@ -117,8 +117,8 @@ junk; it is the same denominator problem as Security Hub's 306 `NOT_AVAILABLE`.
 
 | Severity | Check | Where it is handled |
 |---|---|---|
-| Critical | `iam_aws_attached_policy_no_administrative_privileges` | Fixed 2026-11-13: admin moved to Identity Center; `project_admin` has no key and no password, deletion pending. Not yet re-scanned |
-| High | `iam_user_mfa_enabled_console_access` | Fixed 2026-11-13: `project_admin` login profile removed; Identity Center requires MFA. Not yet re-scanned |
+| Critical | `iam_aws_attached_policy_no_administrative_privileges` | Long-lived admin user removed; the check still fails on the Identity Center admin role - accepted, see below and the confirming scan |
+| High | `iam_user_mfa_enabled_console_access` | `project_admin` deleted 2026-11-16; with no IAM users left the check is absent in the confirming scan, not passed |
 | High | `iam_avoid_root_usage` | Reviewed, accepted - see below |
 | High | `guardduty_is_enabled` | project 2 |
 | High | `ec2_ebs_default_encryption` | Fixed 2026-11-13: enabled in us-east-1 (`raw/ebs-default-encryption-after.json`) |
@@ -126,10 +126,40 @@ junk; it is the same denominator problem as Security Hub's 306 `NOT_AVAILABLE`.
 | High | `ec2_networkacl_allow_ingress_any_port` | Accepted - see below |
 | High | `sns_topics_kms_encryption_at_rest_enabled` | Accepted - see below |
 
+### Confirming scan, 2026-11-17 (`prowler-after3/`)
+
+Run after `project_admin` and the `admin` group were deleted (0 IAM users, 0 groups -
+`raw/iam-users-groups-after.json`) and after project 2 had enabled GuardDuty. Same Prowler version
+and frameworks.
+
+| Measure | After (2026-11-13) | Confirming (2026-11-17) |
+|---|---|---|
+| Findings (FAIL / PASS / MANUAL) | 50 / 53 / 4 | 36 / 44 / 4 |
+| Checks failing | 45 of 78 | 32 of 60 |
+| Rows naming `project_admin` | present | 0 |
+
+The checks went from 78 to 60 because Prowler does not evaluate what no longer exists: with the lab
+torn down and no IAM users, the EBS, NACL, instance and console-MFA checks are **absent**, not passed.
+That is the same denominator problem as the first scan, from the other side - fewer failures partly
+because there is less to fail on.
+
+What the scan settled:
+
+- **Root usage** now passes: the 2026-11-12 setup activity aged out of the look-back window.
+- **GuardDuty** passes, because project 2 enabled it. Its new failure,
+  `guardduty_no_high_severity_findings`, is project 2's triage work.
+- **The critical admin-policy finding still fails** - on `AdministratorAccess` attached to the role
+  Identity Center created for the `lab_admin` permission set, the only entity holding it
+  (`raw/admin-policy-attachments-after.json`). Moving from a long-lived IAM user to that role closed
+  the credential risk; it did not remove standing full admin. Accepted below.
+- **SNS encryption** now fails on two topics: `sec-lab-budget` (accepted below) and project 2's
+  `gd-alerts`, which is project 2's decision.
+
 ## Accepted, not fixed
 
 | Item | Why it stays |
 |---|---|
+| `AdministratorAccess` on the Identity Center admin role (`iam_aws_attached_policy_no_administrative_privileges`, Critical) | The check still fails because full admin access can be assumed through Identity Center. That's acceptable for now because only I can use it: it takes my username, password, and passkey, each session ends after 4 hours, and there are no permanent keys to leak. I'll fix it in project 4 by creating a narrower permission set for day-to-day lab use. Accepted 2026-11-20. |
 | Root usage (`iam_avoid_root_usage`, High) | Root was used on 2026-11-12, 15:05-15:08, to delete an old IAM user and create the first admin before Identity Center existed - 84 events, all in that window (`raw/root-usage-review.json`). All administration since then goes through Identity Center. Root keeps MFA and has no access keys, and is reserved for root-only tasks. The check looks back over recent history, so it will keep failing for a while. |
 | Default VPC NACL allows all inbound (`ec2_networkacl_allow_ingress_any_port`, High; also the port 22 and 3389 NACL checks) | Tightening it adds friction without adding security this environment needs: security groups already filter at the instance, there is no sensitive data, and nothing operational depends on the account, so a redundant defense-in-depth layer is not warranted here. A working NACL would still need inbound 1024-65535 for return traffic, which keeps the 3389 check failing unless explicit denies are numbered ahead of it, and NACL drops show up as silent timeouts in later labs. Accepted 2026-11-13. Revisit if the account ever holds sensitive data or production workloads; use a dedicated NACL on that subnet rather than editing the default one. |
 | SNS topic `sec-lab-budget` not KMS-encrypted (`sns_topics_kms_encryption_at_rest_enabled`, High) | The topic carries budget alerts only - a dollar amount and a threshold, no sensitive data. AWS Budgets can only publish to an encrypted topic through a customer-managed KMS key whose policy grants it access (the AWS-managed `aws/sns` key policy cannot be edited), so the fix costs ~1 USD/month and adds a way for alerts to fail silently. Accepted 2026-11-13. Revisit if the topic ever carries anything beyond budget alerts. |
@@ -192,6 +222,9 @@ Recorded because these are the parts I would otherwise forget:
 | `prowler-after/prowler-after.{csv,html,ocsf.json}`, `prowler-after/compliance/` | after-scan, same frameworks, redacted |
 | `before-after.csv` | per-check delta: 8 fixed, 0 regressed, 4 gone |
 | `before-after-findings.csv` | per check and resource: 7 fixed, 70 gone, 1 new |
+| `prowler-after3/prowler-after3.{csv,html,ocsf.json}`, `prowler-after3/compliance/` | confirming scan 2026-11-17, redacted |
+| `raw/iam-users-groups-after.json` | 0 IAM users, 0 groups |
+| `raw/admin-policy-attachments-after.json` | `AdministratorAccess` attached only to the Identity Center admin role |
 
 Redaction: account ID masked in filenames and contents; the key ID and the SNS subscription email are
 masked in the Prowler exports; the instance public IP is masked. `scripts/redact-audit.sh` enforces

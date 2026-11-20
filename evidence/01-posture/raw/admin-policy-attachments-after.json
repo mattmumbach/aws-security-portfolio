@@ -1,0 +1,10 @@
+{
+    "PolicyGroups": [],
+    "PolicyUsers": [],
+    "PolicyRoles": [
+        {
+            "RoleName": "AWSReservedSSO_AdministratorAccess_e5617a3f6dcf8c2a",
+            "RoleId": "AROA****************"
+        }
+    ]
+}
