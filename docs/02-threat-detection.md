@@ -2,8 +2,8 @@
 
 **Status:** complete, 2026-11-20 (detection and triage 2026-11-17, automatic restart 2026-11-20) | **Account:** 58********27 | **Region:** us-east-1
 **Cost:** GuardDuty is inside its 30-day free trial (`evidence/02-detection/raw/free-trial-days.txt`).
-The restart function runs about 8,640 times a month on its schedule, inside the Lambda and
-EventBridge Scheduler free tiers.
+While it was deployed, the restart function ran on its schedule at a rate of about 8,640 times a
+month, inside the Lambda and EventBridge Scheduler free tiers. It was deleted after testing.
 
 ## Summary
 
@@ -36,7 +36,7 @@ the rule, and it does not depend on the event arriving.
 | SNS topic `gd-alerts` | Did not exist | Created, one confirmed email subscriber |
 | EventBridge rule `guardduty-high` | Did not exist | Passes GuardDuty findings with severity 7 or higher to the topic |
 | Topic access policy | Default statement only | Second statement lets that one rule publish (`scripts/02-topic-policy.sh`) |
-| CloudFormation stack `trail-guard` | Did not exist | Seven resources from `scripts/02-remediate/trail-restart.yaml`: a Lambda function and its log group, an EventBridge rule, an EventBridge Scheduler schedule, two roles and one Lambda permission |
+| CloudFormation stack `trail-guard` | Did not exist | Seven resources from `scripts/02-remediate/trail-restart.yaml`: a Lambda function and its log group, an EventBridge rule, an EventBridge Scheduler schedule, two roles and one Lambda permission. Deleted on 2026-11-20 after testing |
 
 Everything was built one command at a time from the CLI, with a read-only check before and after
 each change. All paths below are under `evidence/02-detection/`.
@@ -138,6 +138,10 @@ CloudFormation stack. The template differs from the hand-built version in two wa
 function's log group itself with 30-day retention, so the role no longer needs permission to create
 one, and the trail name and check interval are parameters. One trial of each path was run against
 the stack.
+
+After the trials I deleted the stack with one command and confirmed that the schedule, the rule,
+the function, both roles and the log group were gone and that the trail was still logging. The
+hand-built version had taken nine deletes in a set order.
 
 ## Result
 
@@ -263,6 +267,7 @@ These were left out on purpose. Nothing in this section was performed, and it ca
 | `raw/phase2-spoof-*` | The two forged events and EventBridge's response to each |
 | `raw/phase2-stack-resources.json` | The seven resources of the `trail-guard` stack |
 | `raw/phase2-test8-*`, `raw/phase2-test9-*` | Trials against the stack: the rule, then the schedule alone |
+| `raw/phase2-stack-teardown.txt` | The stack and its resources are gone, and the trail is logging |
 | `scripts/02-remediate/` | The template, the function's code, the policy scripts and the trial script |
 
 Redaction: account ID, access key IDs, role IDs, IP addresses, IP location and network owner, and

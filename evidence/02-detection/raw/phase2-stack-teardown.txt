@@ -1,0 +1,17 @@
+trail-guard stack teardown check, 2026-11-20T22:13:57Z
+# stack
+aws: [ERROR]: An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id trail-guard does not existAdditional error details:Type: Sender
+# schedules
+[]
+# rules
+[
+    "guardduty-high"
+]
+# functions
+[]
+# roles starting trail-guard
+[]
+# log groups under /aws/lambda/trail
+[]
+# trail
+True
