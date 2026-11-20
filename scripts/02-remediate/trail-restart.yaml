@@ -1,0 +1,199 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Keeps one CloudTrail trail logging. A rule restarts the trail within seconds when the
+  StopLogging event arrives; a five-minute schedule restarts it when the event does not.
+  Built by hand first (see docs/02-threat-detection.md), then captured here so the same
+  thing can be deployed to an account in one step.
+
+# The function's code below is a copy of scripts/02-remediate/handler.py without its long
+# docstring. handler.py is the version that was tested; if one changes, change the other.
+#
+# Two differences from the hand-built version, both deliberate:
+#   - the log group is created here with a retention period, so the function's role no longer
+#     needs logs:CreateLogGroup;
+#   - resource names come from the stack name, so two stacks cannot collide.
+
+Parameters:
+  TrailName:
+    Type: String
+    Default: org-trail
+    Description: Name of the trail to keep logging. It must be in this account and Region.
+  CheckEveryMinutes:
+    Type: Number
+    Default: 5
+    MinValue: 2
+    Description: How often the scheduled check runs. This is the longest the trail can stay off.
+
+Resources:
+  FunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}-restart"
+      RetentionInDays: 30
+
+  # What the function may do: read the status of one trail, restart it, write its own logs.
+  FunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: LambdaServiceMayAssumeThisRole
+            Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: restart-one-trail
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: CheckAndRestartTheOneTrail
+                Effect: Allow
+                Action: [ "cloudtrail:GetTrailStatus", "cloudtrail:StartLogging" ]
+                Resource: !Sub "arn:${AWS::Partition}:cloudtrail:${AWS::Region}:${AWS::AccountId}:trail/${TrailName}"
+              - Sid: WriteOwnLogs
+                Effect: Allow
+                Action: [ "logs:CreateLogStream", "logs:PutLogEvents" ]
+                Resource: !Sub "${FunctionLogGroup.Arn}"
+
+  Function:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-restart"
+      Description: !Sub "Restarts ${TrailName} when it is stopped, by event or by scheduled check"
+      Runtime: python3.12
+      Handler: index.handler
+      Timeout: 10
+      Role: !GetAtt FunctionRole.Arn
+      LoggingConfig:
+        LogGroup: !Ref FunctionLogGroup
+      Environment:
+        Variables:
+          TRAIL_NAME: !Ref TrailName
+      Code:
+        ZipFile: |
+          import json
+          import os
+          from datetime import datetime, timezone
+
+          import boto3
+
+          TRAIL_NAME = os.environ["TRAIL_NAME"]
+          cloudtrail = boto3.client("cloudtrail")
+
+
+          def now():
+              return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+          def log(**fields):
+              print(json.dumps(fields))
+
+
+          def scheduled_check(received):
+              status = cloudtrail.get_trail_status(Name=TRAIL_NAME)
+              if status["IsLogging"]:
+                  log(action="checked", is_logging=True, function_received=received)
+                  return {"action": "checked"}
+              stopped = status.get("StopLoggingTime")
+              cloudtrail.start_logging(Name=TRAIL_NAME)
+              log(action="restarted_by_schedule", trail=TRAIL_NAME,
+                  trail_stopped=stopped.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ") if stopped else None,
+                  function_received=received, start_logging_returned=now())
+              return {"action": "restarted_by_schedule"}
+
+
+          def handler(event, context):
+              received = now()
+              if event.get("check") == "scheduled":
+                  return scheduled_check(received)
+
+              detail = event.get("detail", {})
+              base = {"cloudtrail_event_id": detail.get("eventID"), "stop_call_time": detail.get("eventTime"),
+                      "function_received": received}
+
+              # The caller may have passed the trail's name or its full ARN.
+              requested = (detail.get("requestParameters") or {}).get("name", "")
+              if requested != TRAIL_NAME and not requested.endswith(f":trail/{TRAIL_NAME}"):
+                  log(action="skipped", reason="the call was for a different trail", **base)
+                  return {"action": "skipped"}
+
+              if detail.get("errorCode"):
+                  log(action="skipped", reason="the StopLogging call failed, so nothing was stopped",
+                      error_code=detail["errorCode"], **base)
+                  return {"action": "skipped"}
+
+              cloudtrail.start_logging(Name=TRAIL_NAME)
+              log(action="restarted", trail=TRAIL_NAME, start_logging_returned=now(), **base)
+              return {"action": "restarted"}
+
+  # Fast path: the CloudTrail record of a StopLogging call, delivered by EventBridge.
+  StopLoggingRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Matches the CloudTrail record of a StopLogging call
+      State: ENABLED
+      EventPattern:
+        source: [ "aws.cloudtrail" ]
+        detail-type: [ "AWS API Call via CloudTrail" ]
+        detail:
+          eventSource: [ "cloudtrail.amazonaws.com" ]
+          eventName: [ "StopLogging" ]
+      Targets:
+        - Id: restart-function
+          Arn: !GetAtt Function.Arn
+
+  # Who may start the function: the EventBridge service, and only on behalf of that one rule.
+  RuleMayInvokeFunction:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref Function
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt StopLoggingRule.Arn
+
+  # Backstop: what EventBridge Scheduler may do, which is invoke the one function.
+  SchedulerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: SchedulerMayAssumeForThisAccountsSchedules
+            Effect: Allow
+            Principal: { Service: scheduler.amazonaws.com }
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                "aws:SourceAccount": !Ref AWS::AccountId
+                "aws:SourceArn": !Sub "arn:${AWS::Partition}:scheduler:${AWS::Region}:${AWS::AccountId}:schedule-group/default"
+      Policies:
+        - PolicyName: invoke-restart-function
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: InvokeTheOneFunction
+                Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt Function.Arn
+
+  LoggingCheck:
+    Type: AWS::Scheduler::Schedule
+    Properties:
+      Description: !Sub "Is ${TrailName} logging? Restart it if not."
+      ScheduleExpression: !Sub "rate(${CheckEveryMinutes} minutes)"
+      FlexibleTimeWindow: { Mode: "OFF" }
+      State: ENABLED
+      Target:
+        Arn: !GetAtt Function.Arn
+        RoleArn: !GetAtt SchedulerRole.Arn
+        Input: '{"check":"scheduled"}'
+        RetryPolicy: { MaximumRetryAttempts: 0 }
+
+Outputs:
+  FunctionName:
+    Value: !Ref Function
+  RuleName:
+    Value: !Ref StopLoggingRule
+  ScheduleName:
+    Value: !Ref LoggingCheck

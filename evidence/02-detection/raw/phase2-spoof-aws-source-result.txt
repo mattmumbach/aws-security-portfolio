@@ -1,0 +1,11 @@
+# aws events put-events --entries file://evidence/02-detection/raw/phase2-spoof-entries-aws-source.json
+# Run by hand on 2026-11-18 from an administrator session; output pasted from the terminal.
+{
+    "FailedEntryCount": 1,
+    "Entries": [
+        {
+            "ErrorCode": "NotAuthorizedForSourceException",
+            "ErrorMessage": "Not authorized for the source."
+        }
+    ]
+}

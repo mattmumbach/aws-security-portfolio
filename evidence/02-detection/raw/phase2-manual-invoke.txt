@@ -1,0 +1,7 @@
+# Direct invocation of trail-restart with phase2-test-event-stop.json, before any rule was attached.
+# Run by hand on 2026-11-18; output pasted from the terminal. The trail was already logging.
+START RequestId: f77e4745-91b4-46b2-8740-db42aa26e518 Version: $LATEST
+{"action": "restarted", "trail": "org-trail", "start_logging_returned": "2026-11-18T17:48:13.541141Z", "cloudtrail_event_id": "4fe165da-de69-4c8b-af0e-0d8ec2388b1d", "stop_call_time": "2026-11-17T14:00:17Z", "function_received": "2026-11-18T17:48:13.189090Z"}
+END RequestId: f77e4745-91b4-46b2-8740-db42aa26e518
+REPORT RequestId: f77e4745-91b4-46b2-8740-db42aa26e518  Duration: 373.90 ms     Billed Duration: 749 ms Memory Size: 128 MB     Max Memory Used: 88 MB   Init Duration: 375.04 ms
+{"action": "restarted"}

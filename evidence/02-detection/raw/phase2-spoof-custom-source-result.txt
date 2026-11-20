@@ -1,0 +1,10 @@
+# aws events put-events --entries file://evidence/02-detection/raw/phase2-spoof-entries-custom-source.json
+# Run by hand on 2026-11-18; output pasted from the terminal. The event was accepted onto the bus.
+{
+    "FailedEntryCount": 0,
+    "Entries": [
+        {
+            "EventId": "19d6298c-b2cf-0a97-8c3a-85eecb2aa32d"
+        }
+    ]
+}

@@ -1,0 +1,51 @@
+[
+  {
+    "LogicalId": "Function",
+    "Type": "AWS::Lambda::Function",
+    "PhysicalId": "trail-guard-restart",
+    "Status": "CREATE_COMPLETE",
+    "Created": "2026-11-19T17:40:27.082000+00:00"
+  },
+  {
+    "LogicalId": "FunctionLogGroup",
+    "Type": "AWS::Logs::LogGroup",
+    "PhysicalId": "/aws/lambda/trail-guard-restart",
+    "Status": "CREATE_COMPLETE",
+    "Created": "2026-11-19T17:39:59.265000+00:00"
+  },
+  {
+    "LogicalId": "FunctionRole",
+    "Type": "AWS::IAM::Role",
+    "PhysicalId": "trail-guard-FunctionRole-NpEkEuJTjEto",
+    "Status": "CREATE_COMPLETE",
+    "Created": "2026-11-19T17:40:17.402000+00:00"
+  },
+  {
+    "LogicalId": "LoggingCheck",
+    "Type": "AWS::Scheduler::Schedule",
+    "PhysicalId": "trail-guard-LoggingCheck-1O88PROF1E0SQ",
+    "Status": "CREATE_COMPLETE",
+    "Created": "2026-11-19T17:40:47.588000+00:00"
+  },
+  {
+    "LogicalId": "RuleMayInvokeFunction",
+    "Type": "AWS::Lambda::Permission",
+    "PhysicalId": "trail-guard-RuleMayInvokeFunction-JU9hagG5OIe6",
+    "Status": "CREATE_COMPLETE",
+    "Created": "2026-11-19T17:41:19.902000+00:00"
+  },
+  {
+    "LogicalId": "SchedulerRole",
+    "Type": "AWS::IAM::Role",
+    "PhysicalId": "trail-guard-SchedulerRole-UN60YGCqgiSZ",
+    "Status": "CREATE_COMPLETE",
+    "Created": "2026-11-19T17:40:44.898000+00:00"
+  },
+  {
+    "LogicalId": "StopLoggingRule",
+    "Type": "AWS::Events::Rule",
+    "PhysicalId": "trail-guard-StopLoggingRule-h73Iq8r26Mz2",
+    "Status": "CREATE_COMPLETE",
+    "Created": "2026-11-19T17:41:29.468000+00:00"
+  }
+]

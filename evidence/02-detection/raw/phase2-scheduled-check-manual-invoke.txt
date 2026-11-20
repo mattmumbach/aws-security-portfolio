@@ -1,0 +1,7 @@
+# Direct invocation of trail-restart with {"check":"scheduled"}, before any schedule was attached.
+# Run by hand on 2026-11-18; output pasted from the terminal. The trail was logging.
+START RequestId: 7367598e-68b6-4d3c-aaf8-8f8f4f0f19f1 Version: $LATEST
+{"action": "checked", "is_logging": true, "function_received": "2026-11-18T18:46:10.671898Z"}
+END RequestId: 7367598e-68b6-4d3c-aaf8-8f8f4f0f19f1
+REPORT RequestId: 7367598e-68b6-4d3c-aaf8-8f8f4f0f19f1  Duration: 306.94 ms     Billed Duration: 775 ms Memory Size: 128 MB  Max Memory Used: 88 MB  Init Duration: 467.79 ms
+{"action": "checked"}

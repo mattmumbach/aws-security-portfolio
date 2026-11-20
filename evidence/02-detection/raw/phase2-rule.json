@@ -1,0 +1,9 @@
+{
+  "Name": "trail-stop-restart",
+  "Arn": "arn:aws:events:us-east-1:58********27:rule/trail-stop-restart",
+  "EventPattern": "{\"source\": [\"aws.cloudtrail\"], \"detail-type\": [\"AWS API Call via CloudTrail\"], \"detail\": {\"eventSource\": [\"cloudtrail.amazonaws.com\"], \"eventName\": [\"StopLogging\"]}}",
+  "State": "ENABLED",
+  "Description": "Matches the CloudTrail record of a StopLogging call",
+  "EventBusName": "default",
+  "CreatedBy": "58********27"
+}

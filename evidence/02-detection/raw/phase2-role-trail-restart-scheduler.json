@@ -1,0 +1,34 @@
+{
+  "Role": {
+    "Path": "/",
+    "RoleName": "trail-restart-scheduler",
+    "RoleId": "AROA****************",
+    "Arn": "arn:aws:iam::58********27:role/trail-restart-scheduler",
+    "CreateDate": "2026-11-18T18:49:11+00:00",
+    "AssumeRolePolicyDocument": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Sid": "SchedulerMayAssumeForThisAccountsSchedules",
+          "Effect": "Allow",
+          "Principal": {
+            "Service": "scheduler.amazonaws.com"
+          },
+          "Action": "sts:AssumeRole",
+          "Condition": {
+            "StringEquals": {
+              "aws:SourceAccount": "58********27",
+              "aws:SourceArn": "arn:aws:scheduler:us-east-1:58********27:schedule-group/default"
+            }
+          }
+        }
+      ]
+    },
+    "Description": "Lets EventBridge Scheduler invoke the trail-restart function",
+    "MaxSessionDuration": 3600,
+    "RoleLastUsed": {
+      "LastUsedDate": "2026-11-18T19:09:43+00:00",
+      "Region": "us-east-1"
+    }
+  }
+}

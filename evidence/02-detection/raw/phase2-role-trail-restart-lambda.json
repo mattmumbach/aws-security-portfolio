@@ -1,0 +1,28 @@
+{
+  "Role": {
+    "Path": "/",
+    "RoleName": "trail-restart-lambda",
+    "RoleId": "AROA****************",
+    "Arn": "arn:aws:iam::58********27:role/trail-restart-lambda",
+    "CreateDate": "2026-11-18T17:09:34+00:00",
+    "AssumeRolePolicyDocument": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Sid": "LambdaServiceMayAssumeThisRole",
+          "Effect": "Allow",
+          "Principal": {
+            "Service": "lambda.amazonaws.com"
+          },
+          "Action": "sts:AssumeRole"
+        }
+      ]
+    },
+    "Description": "Execution role for the function that restarts org-trail",
+    "MaxSessionDuration": 3600,
+    "RoleLastUsed": {
+      "LastUsedDate": "2026-11-18T19:09:52+00:00",
+      "Region": "us-east-1"
+    }
+  }
+}

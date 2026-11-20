@@ -1,0 +1,8 @@
+[
+  "{\"action\": \"restarted\", \"trail\": \"org-trail\", \"start_logging_returned\": \"2026-11-18T17:48:13.541141Z\", \"cloudtrail_event_id\": \"4fe165da-de69-4c8b-af0e-0d8ec2388b1d\", \"stop_call_time\": \"2026-11-17T14:00:17Z\", \"function_received\": \"2026-11-18T17:48:13.189090Z\"}",
+  "{\"action\": \"restarted\", \"trail\": \"org-trail\", \"start_logging_returned\": \"2026-11-18T17:56:56.292140Z\", \"cloudtrail_event_id\": \"8b3a2691-1f80-4781-a049-6d1254f650f2\", \"stop_call_time\": \"2026-11-18T17:56:53Z\", \"function_received\": \"2026-11-18T17:56:55.915609Z\"}",
+  "{\"action\": \"restarted\", \"trail\": \"org-trail\", \"start_logging_returned\": \"2026-11-18T18:23:32.968393Z\", \"cloudtrail_event_id\": \"6fc791de-4453-4294-aa4f-3c50643fe595\", \"stop_call_time\": \"2026-11-18T18:23:29Z\", \"function_received\": \"2026-11-18T18:23:32.630388Z\"}",
+  "{\"action\": \"restarted\", \"trail\": \"org-trail\", \"start_logging_returned\": \"2026-11-18T18:30:09.762006Z\", \"cloudtrail_event_id\": \"af2c0184-bf4c-4977-918b-1a78245d0d2d\", \"stop_call_time\": \"2026-11-18T18:30:06Z\", \"function_received\": \"2026-11-18T18:30:09.315389Z\"}",
+  "{\"action\": \"restarted\", \"trail\": \"org-trail\", \"start_logging_returned\": \"2026-11-18T18:30:46.136873Z\", \"cloudtrail_event_id\": \"18e0d73c-f440-4dcc-aaa2-dcd7f835de78\", \"stop_call_time\": \"2026-11-18T18:30:42Z\", \"function_received\": \"2026-11-18T18:30:46.054701Z\"}",
+  "{\"action\": \"restarted_by_schedule\", \"trail\": \"org-trail\", \"trail_stopped\": \"2026-11-18T19:14:33.042000Z\", \"function_received\": \"2026-11-18T19:14:43.277013Z\", \"start_logging_returned\": \"2026-11-18T19:14:43.649912Z\"}"
+]

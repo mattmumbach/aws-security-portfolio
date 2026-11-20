@@ -1,0 +1,11 @@
+trial 8: stop requested 2026-11-19T17:50:45Z, watching for up to 60 s
+17:50:46 IsLogging=False
+17:50:48 IsLogging=False
+17:50:51 IsLogging=True
+outcome: restarted automatically
+trail status, UTC:
+{
+    "IsLogging": true,
+    "Stopped": "2026-11-19T17:50:45Z",
+    "Restarted": "2026-11-19T17:50:50Z"
+}

@@ -43,6 +43,12 @@ I tested it with sample findings and with real actions in the account, and triag
 against CloudTrail by hand and with a script. One of two real actions was never detected, and the
 one that was detected was rated too low to send an alert.
 
+Because detection took 18 minutes and told nobody, I then built an automatic restart for the trail:
+a Lambda function started by an EventBridge rule, with a five-minute scheduled check behind it,
+first by hand and then as a CloudFormation stack. The rule restarted the trail in about five
+seconds when the stop event reached it, which it did in 5 of 7 trials; the scheduled check caught
+the stop when the rule was switched off.
+
 | Open this | To see |
 |---|---|
 | [`docs/02-threat-detection.md`](docs/02-threat-detection.md) | The write-up: what was built, the measurements, what I got wrong, what was not built and why |
@@ -50,6 +56,7 @@ one that was detected was rated too low to send an alert.
 | [`evidence/02-detection/triage-finding3.md`](evidence/02-detection/triage-finding3.md) | The triage record: the alert checked against CloudTrail, and the verdict |
 | [`evidence/02-detection/triage-times.md`](evidence/02-detection/triage-times.md) | Every timing, with what each one does and does not measure |
 | [`scripts/02-triage.py`](scripts/02-triage.py) | The script that pulls a finding and the CloudTrail activity behind it |
+| [`scripts/02-remediate/trail-restart.yaml`](scripts/02-remediate/trail-restart.yaml) | The CloudFormation template for the automatic restart: function, rule, schedule and least-privilege roles |
 
 ## Roadmap
 
@@ -57,7 +64,6 @@ These are not started or not finished. Each one is added here when it is done.
 
 | Project | Core AWS services |
 |---|---|
-| Automated remediation for a stopped trail (phase 2 of project 2, next) | EventBridge, Lambda, CloudTrail |
 | IAM audit and least privilege | IAM, Access Analyzer, CloudTrail |
 | Incident response runbook | IAM, EC2, GuardDuty, CloudTrail |
 | Compliance with policy as code, mapped to NIST 800-53 | Config, conformance packs, cfn-guard |

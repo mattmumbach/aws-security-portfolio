@@ -1,0 +1,33 @@
+{
+  "RoleName": "trail-restart-lambda",
+  "PolicyName": "restart-org-trail",
+  "PolicyDocument": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "CheckAndRestartTheOneTrail",
+        "Effect": "Allow",
+        "Action": [
+          "cloudtrail:GetTrailStatus",
+          "cloudtrail:StartLogging"
+        ],
+        "Resource": "arn:aws:cloudtrail:us-east-1:58********27:trail/org-trail"
+      },
+      {
+        "Sid": "CreateOwnLogGroup",
+        "Effect": "Allow",
+        "Action": "logs:CreateLogGroup",
+        "Resource": "arn:aws:logs:us-east-1:58********27:log-group:/aws/lambda/trail-restart:*"
+      },
+      {
+        "Sid": "WriteOwnLogs",
+        "Effect": "Allow",
+        "Action": [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource": "arn:aws:logs:us-east-1:58********27:log-group:/aws/lambda/trail-restart:*"
+      }
+    ]
+  }
+}

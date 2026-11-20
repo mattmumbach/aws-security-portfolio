@@ -1,0 +1,7 @@
+[
+  "INIT_START Runtime Version: python:3.12.mainlinev2.v86\tRuntime Version ARN: arn:aws:lambda:us-east-1::runtime:9d15a516fef11563a8c452bd8d3fe5a5a120b73013e74783e925235557467534\n",
+  "START RequestId: 81693d26-d33c-4a49-9cf6-8d2889724bf4 Version: $LATEST\n",
+  "{\"action\": \"restarted\", \"trail\": \"org-trail\", \"start_logging_returned\": \"2026-11-18T17:56:56.292140Z\", \"cloudtrail_event_id\": \"8b3a2691-1f80-4781-a049-6d1254f650f2\", \"stop_call_time\": \"2026-11-18T17:56:53Z\", \"function_received\": \"2026-11-18T17:56:55.915609Z\"}",
+  "END RequestId: 81693d26-d33c-4a49-9cf6-8d2889724bf4\n",
+  "REPORT RequestId: 81693d26-d33c-4a49-9cf6-8d2889724bf4\tDuration: 391.17 ms\tBilled Duration: 871 ms\tMemory Size: 128 MB\tMax Memory Used: 88 MB\tInit Duration: 479.00 ms\t\n"
+]

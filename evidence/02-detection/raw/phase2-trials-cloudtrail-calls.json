@@ -1,0 +1,107 @@
+[
+  {
+    "eventTime": "2026-11-18T17:48:13Z",
+    "eventName": "StartLogging",
+    "session": "function trail-restart",
+    "eventID": "9cc13f30-e0b5-44a4-8caf-9c4cb5f749e4",
+    "errorCode": null
+  },
+  {
+    "eventTime": "2026-11-18T17:56:53Z",
+    "eventName": "StopLogging",
+    "session": "operator, by hand or by the trial script",
+    "eventID": "8b3a2691-1f80-4781-a049-6d1254f650f2",
+    "errorCode": null
+  },
+  {
+    "eventTime": "2026-11-18T17:56:56Z",
+    "eventName": "StartLogging",
+    "session": "function trail-restart",
+    "eventID": "011d9d9b-bd76-46ab-8bbf-3fadeccf15d4",
+    "errorCode": null
+  },
+  {
+    "eventTime": "2026-11-18T18:07:08Z",
+    "eventName": "StopLogging",
+    "session": "operator, by hand or by the trial script",
+    "eventID": "2c541d23-1058-42fc-bf5f-f31ae3bef7b0",
+    "errorCode": null
+  },
+  {
+    "eventTime": "2026-11-18T18:15:12Z",
+    "eventName": "StartLogging",
+    "session": "operator, by hand or by the trial script",
+    "eventID": "818a4c0f-ed6f-4c9a-8e8b-70d8252b2c1e",
+    "errorCode": null
+  },
+  {
+    "eventTime": "2026-11-18T18:23:29Z",
+    "eventName": "StopLogging",
+    "session": "operator, by hand or by the trial script",
+    "eventID": "6fc791de-4453-4294-aa4f-3c50643fe595",
+    "errorCode": null
+  },
+  {
+    "eventTime": "2026-11-18T18:23:32Z",
+    "eventName": "StartLogging",
+    "session": "function trail-restart",
+    "eventID": "9a395565-bc16-4ab2-94b2-3f15d45aaaaa",
+    "errorCode": null
+  },
+  {
+    "eventTime": "2026-11-18T18:23:59Z",
+    "eventName": "StopLogging",
+    "session": "operator, by hand or by the trial script",
+    "eventID": "8e5d4ff4-37f5-4d33-82c8-b3a21446ed43",
+    "errorCode": null
+  },
+  {
+    "eventTime": "2026-11-18T18:25:15Z",
+    "eventName": "StartLogging",
+    "session": "operator, by hand or by the trial script",
+    "eventID": "8db5e1cf-6334-458e-8df8-9b724ba4aa28",
+    "errorCode": null
+  },
+  {
+    "eventTime": "2026-11-18T18:30:06Z",
+    "eventName": "StopLogging",
+    "session": "operator, by hand or by the trial script",
+    "eventID": "af2c0184-bf4c-4977-918b-1a78245d0d2d",
+    "errorCode": null
+  },
+  {
+    "eventTime": "2026-11-18T18:30:09Z",
+    "eventName": "StartLogging",
+    "session": "function trail-restart",
+    "eventID": "425a765a-eeaf-4fc7-a449-47faedbfc3d8",
+    "errorCode": null
+  },
+  {
+    "eventTime": "2026-11-18T18:30:42Z",
+    "eventName": "StopLogging",
+    "session": "operator, by hand or by the trial script",
+    "eventID": "18e0d73c-f440-4dcc-aaa2-dcd7f835de78",
+    "errorCode": null
+  },
+  {
+    "eventTime": "2026-11-18T18:30:46Z",
+    "eventName": "StartLogging",
+    "session": "function trail-restart",
+    "eventID": "72fe40e7-dd42-4ae1-b443-f2ee640824fe",
+    "errorCode": null
+  },
+  {
+    "eventTime": "2026-11-18T19:14:33Z",
+    "eventName": "StopLogging",
+    "session": "operator, by hand or by the trial script",
+    "eventID": "fbb9fa23-2786-410a-b969-d60e16bbcdcd",
+    "errorCode": null
+  },
+  {
+    "eventTime": "2026-11-18T19:14:43Z",
+    "eventName": "StartLogging",
+    "session": "function trail-restart",
+    "eventID": "4c959b70-5566-465d-be65-99f43507cb7a",
+    "errorCode": null
+  }
+]

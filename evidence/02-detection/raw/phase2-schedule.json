@@ -1,0 +1,24 @@
+{
+  "ActionAfterCompletion": "NONE",
+  "Arn": "arn:aws:scheduler:us-east-1:58********27:schedule/default/trail-logging-check",
+  "CreationDate": "2026-11-18T13:59:29.090000-05:00",
+  "Description": "Every five minutes: is org-trail logging? Restart it if not.",
+  "FlexibleTimeWindow": {
+    "Mode": "OFF"
+  },
+  "GroupName": "default",
+  "LastModificationDate": "2026-11-18T13:59:29.090000-05:00",
+  "Name": "trail-logging-check",
+  "ScheduleExpression": "rate(5 minutes)",
+  "ScheduleExpressionTimezone": "UTC",
+  "State": "ENABLED",
+  "Target": {
+    "Arn": "arn:aws:lambda:us-east-1:58********27:function:trail-restart",
+    "Input": "{\"check\": \"scheduled\"}",
+    "RetryPolicy": {
+      "MaximumEventAgeInSeconds": 86400,
+      "MaximumRetryAttempts": 0
+    },
+    "RoleArn": "arn:aws:iam::58********27:role/trail-restart-scheduler"
+  }
+}
